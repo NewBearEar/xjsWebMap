@@ -2,12 +2,22 @@
 <html lang="en" >
 <head>
     <meta http-equiv="content-type" content="text/html" charset="UTF-8"/>
+    <meta http-equiv="content-type" content="text/html" charset="UTF-8"/>
+    <meta name="renderer" content="webkit|blink"/>
+    <meta name="force-rendering" content="webkit|blink"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1"/>
     <link rel="stylesheet" href="dist/oldist/openlayers/ol.css" type="text/css">
     <style>
         html,body{
             height: 100%;
             margin: 0;
             padding: 0;
+        }
+        #mapTitleBox{
+            position:absolute;
+            left: 50%;
+            transform: translate(-50%);
+            z-index: 1;   /*用于调整压盖顺序*/
         }
         #map {
             clear: both;
@@ -17,8 +27,30 @@
             /*border: 1px solid rgb(78, 78, 78);*/
         }
         #loaction{
-            float:right;
+            position: absolute;
+            left: 90%;
+            z-index: 1;
         }
+
+        #btn{
+
+            width: auto;
+            height: 50px;
+            color:white;
+            background-color:cornflowerblue;
+            border-radius: 3px;/*让按钮变得圆滑一点*/
+            border-width: 0;/*消去丑陋边框*/
+            margin: 0;
+            outline: none;/*取消轮廓*/
+            font-size: 25px;
+            font-family:KaiTi;
+            text-align: center;/*字体居中*/
+            cursor: pointer;/*设置鼠标箭头手势*/
+        }
+        #btn:hover{
+            background-color: antiquewhite;
+        }
+
 
     </style>
     <script type="text/javascript" src="dist/oldist/openlayers/ol.js"></script>
@@ -30,11 +62,20 @@
     <title>xjs olmap</title>
 </head>
 <body>
-
+    <div id="loadgif" style="position:absolute;top:45%;left:45%;z-index: 1">
+        　　<img alt="加载中..." src="img/loading2.gif"/>
+    </div>
+    <div id = mapTitleBox >
+        <div style="text-align: center;">
+            <input type="button" id="btn" value="点击这里加载数据库数据"></input>
+        </div>
+    </div>
     <div id="map" class="map" ></div>
     <div id="wrapper">
         <div id="location"></div>
     </div>
+
+
     <script type="text/javascript">
         //基本底图
         var envstr = '';
@@ -147,26 +188,41 @@
             );
         }
 
-        $.ajax({
-            url : "/getGeoJson", //后台查询验证的方法
-            dataTpye : "json",
-            data : {
-
-            },
-            type : "post",
-            success : function(msg) {
-                var parsedJson = jQuery.parseJSON(msg);
-                console.log(parsedJson);
-            },
-            error:function(){  //请求失败的回调方法
-                alert("请求失败，请重试");
-            }
+        $('#btn').click(function() {
+            $("#loadgif").show();
+            $.ajax({  //AJAX向Servlet发送get请求，请求后台数据库数据
+                url: "getGeoJson", // url不要带/
+                dataTpye: "json",   //传输json
+                data: {},
+                type: "get",
+                success: function (dbGeoJson) {  //回调函数，更新map
+                    //onsole.log(dbGeoJson);  //这里已经传回一个json对象
+                    //var parsedJson = jQuery.parseJSON(msg);
+                    //var parsedJson = eval('('+msg+')');
+                    //console.log(parsedJson);
+                    $("#loadgif").hide();
+                    //添加到到图层
+                    var dbVecLayer = new ol.layer.Vector({
+                        title: 'db vevtor Layer',
+                        source: new ol.source.Vector({
+                            projection: 'EPSG:4326',
+                            features: (new ol.format.GeoJSON()).readFeatures(dbGeoJson)
+                        })
+                    })
+                    //console.log(map.getLayers());
+                    map.addLayer(dbVecLayer);
+                },
+                error: function () {  //请求失败的回调方法
+                    $("#loadgif").hide();
+                    alert("请求失败，请重试");
+                }
+            });
         });
-
 
 
         //函数入口
         $(function () {
+            $("#loadgif").hide();  //隐藏loading动画
             init();
         })
 

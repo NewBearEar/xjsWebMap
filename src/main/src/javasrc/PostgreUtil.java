@@ -8,10 +8,10 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
 
-public class PostgreUtil extends DatabaseUtil {
+public class PostgreUtil extends DatabaseUtil { //postgis连接工具类
     public static void main(String[] args) throws IOException {
-        //尝试连接
-        String url = "jdbc:postgresql://47.94.150.127:5432/chn_test";
+        //尝试连接，工具类不需要实现main
+        /*String url = "jdbc:postgresql://47.94.150.127:5432/chn_test";
         String user = "postgres";
         String passwd = "xiong123";
         Connection testConn = getDbConn(url,user,passwd);
@@ -23,7 +23,7 @@ public class PostgreUtil extends DatabaseUtil {
         ResultSet queryResult = getResultSet(testConn,sql);
         ArrayList<String> jsonStringList = parseResult2String(queryResult);
         System.out.println(jsonStringList.get(0));
-        closeDbConn(testConn);
+        closeDbConn(testConn);*/
     }
 
 
@@ -68,15 +68,15 @@ public class PostgreUtil extends DatabaseUtil {
         ArrayList<String> jsonStringList = new ArrayList<String>();
         try {
             //尝试输出json
-            String filePath = "E:\\1.json";
-            FileOutputStream fos = new FileOutputStream(filePath);
+            //String filePath = "E:\\1.json";
+            //FileOutputStream fos = new FileOutputStream(filePath);
             while(resultSet.next()){
                 jsonString = resultSet.getString("json_build_object");
                 jsonStringList.add(jsonString);
-                System.out.println(jsonString);
+                //System.out.println(jsonString);
             }
-            fos.write(jsonString.getBytes());
-            fos.close();
+            //fos.write(jsonString.getBytes());
+            //fos.close();
         }catch (Exception e){
             e.printStackTrace();
         }finally {
