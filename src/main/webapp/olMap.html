@@ -66,7 +66,7 @@
         　　<img alt="加载中..." src="img/loading2.gif"/>
     </div>
     <div id = mapTitleBox >
-        <form id="formSearch"  action="getGeoJson">   <!--action="getGeoJson"   不需要action-->
+        <form id="formSearch"  action="/xjs/getGeoJson">      <!--action="getGeoJson"   不需要action-->
             <input type="text" id="searchTxt" name="searchTxt" placeholder="输入城市名">
                    <!--onblur="if(this.value == '') this.value='在此输入您要查找的内容，点击搜索';"-->
             <div style="text-align: center;">
@@ -166,7 +166,7 @@
                 title: 'add Layer',
                 source: new ol.source.Vector({
                     projection: 'EPSG:4326',
-                    url: jsonUrl, // testServletUrl,   //GeoJSON的文件路径
+                    url:  testServletUrl, //jsonUrl, // testServletUrl,   //GeoJSON的文件路径
                     // 注意，当servlet正确输出时，这里也可以直接填写servlet的url，不需要利用(ajax)请求返回数据，再用readFeatures方法来加载json对象了
                     format: new ol.format.GeoJSON()
                 })
@@ -218,7 +218,7 @@
             console.log(searchTxtValue);
 
             $.ajax({  //AJAX向Servlet发送get请求，请求后台数据库数据
-                url: "getGeoJson", // url不要带/
+                url: "getGeoJson", // url不带/就是当前路径（因为我这个html放在webapp目录下），而且在页面上访问时已经包含application context，相当于/xjs/getGeoJson
                 dataTpye: "json",   //传输json
                 data:  {searchTxt:searchTxtValue},   //$('#form2').serialize(),  //按键值对形式
                 type: "get",

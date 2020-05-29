@@ -14,7 +14,8 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 
-@WebServlet(name = "GeoJsonServlet",urlPatterns = "/getGeoJson")  //urlPatterns带 /，但AJAX请求不带
+@WebServlet(name = "GeoJsonServlet",urlPatterns = "/getGeoJson")  //urlPatterns带 /，但AJAX请求不带  //这里的/相当于项目文件夹Root目录，但运行在网页上访问的url需要按照application context的url来处理
+//关于urlPatterns和项目结构，以及网页访问时的url三者的联系与区别还是理解的不是特别透彻，之后仔细学一学servlet，这里记之而去
 public class GeoJsonServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         //doGet(request,response);
@@ -39,7 +40,7 @@ public class GeoJsonServlet extends HttpServlet {
                 "           )\n" +
                 "from xianch_point as t ";
         String sql = "";
-        if(!"".equals(searchTxt)) {   //判断查询参数是否为空，利用“”字符串常量调用equals方法，避免searchTxt为null调用equals抛出异常，equals会处理参数为null的情况
+        if(!"".equals(searchTxt) || searchTxt!=null) {   //判断查询参数是否为空，利用“”字符串常量调用equals方法，避免searchTxt为null调用equals抛出异常，equals会处理参数为null的情况
             //这里不能使用逻辑运算符==或！=比较，因为只比较了引用是否相等，注意String Pool
             sql = sqlBase + "where name=" + "\'" + searchTxt + "\'";    //先支持城市名称查询试试
         }else {
