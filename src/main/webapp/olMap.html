@@ -66,9 +66,14 @@
         　　<img alt="加载中..." src="img/loading2.gif"/>
     </div>
     <div id = mapTitleBox >
-        <div style="text-align: center;">
-            <input type="button" id="btn" value="点击这里加载数据库数据"></input>
-        </div>
+        <form id="formSearch"  action="getGeoJson">   <!--action="getGeoJson"   不需要action-->
+            <input type="text" id="searchTxt" name="searchTxt" placeholder="输入城市名">
+                   <!--onblur="if(this.value == '') this.value='在此输入您要查找的内容，点击搜索';"-->
+            <div style="text-align: center;">
+                <input type="button" id="btn" value="点击这里查找数据库数据"></input>
+            </div>
+        </form>
+
     </div>
     <div id="map" class="map" ></div>
     <div id="wrapper">
@@ -81,13 +86,15 @@
         var envstr = '';
         var extent = [73.44696044921875,6.318641185760498,135.08583068847656,53.557926177978516];
 
-        var urlAdr = 'http://47.94.150.127:8080/geoserver/xjs/wms';
+        var urlAdr = 'http://47.94.150.127:8080/geoserver/xjs/wms';   //8080是Tomcat9那个服务器，需要在云端运行tomcat9
         //var layerName = 'xjs:BoundaryChn2_4p,xjs:BoundaryChn2_4l,xjs:BoundaryChn1_4l';
         var layerName = 'xjs:BoundaryChn2_4p,xjs:BoundaryChn2_4l,xjs:BoundaryChn1_4l';
         var tiled;   //Tile WMS
         var untiled;   //WMS服务
         var provinceAnotation; //省注记
+        var dbVecLayer;  //查询图层
         var map; //地图
+        var dbSourceVec;   //数据库矢量数据源
         var init = function(){
             //设置地图范围
 
@@ -152,19 +159,34 @@
             });
 
             //JSON图层
-            var jsonUrl = "data/GeoJSON_HB.json"    //   "data/GeoJSON_HB.json";
+            var jsonUrl = "data/GeoJSON_HB.json" ;   //   "data/GeoJSON_HB.json";
+            var testServletUrl = "getGeoJson";
             //Json读取
             var jsonVecLayer = new ol.layer.Vector({
                 title: 'add Layer',
                 source: new ol.source.Vector({
                     projection: 'EPSG:4326',
-                    url: jsonUrl, //GeoJSON的文件路径
+                    url: jsonUrl, // testServletUrl,   //GeoJSON的文件路径
+                    // 注意，当servlet正确输出时，这里也可以直接填写servlet的url，不需要利用(ajax)请求返回数据，再用readFeatures方法来加载json对象了
                     format: new ol.format.GeoJSON()
                 })
             })
-            var mlayers = [osmtile,tiled,jsonVecLayer,provinceAnotation];  //图层数组
+
+            /*
+            //数据库查询图层
+            dbVecLayer = new ol.layer.Vector({
+                title: 'db vevtor Layer',
+                source: new ol.source.Vector({
+                    projection: 'EPSG:4326',
+
+                })
+            })*/
+
+            var mlayers = [osmtile,tiled,jsonVecLayer,provinceAnotation];  //dbVecLayer];  //图层数组
             return mlayers;
         }
+
+
 
         var initOlTools = function(){
             //自适应地图view
@@ -190,26 +212,32 @@
 
         $('#btn').click(function() {
             $("#loadgif").show();
+            //console.log($('#form2').serialize());  为什么这个函数得不到数据
+            //获取表单对话框内容
+            var searchTxtValue = $('#searchTxt').val();   //val()而不是value()
+            console.log(searchTxtValue);
+
             $.ajax({  //AJAX向Servlet发送get请求，请求后台数据库数据
                 url: "getGeoJson", // url不要带/
                 dataTpye: "json",   //传输json
-                data: {},
+                data:  {searchTxt:searchTxtValue},   //$('#form2').serialize(),  //按键值对形式
                 type: "get",
                 success: function (dbGeoJson) {  //回调函数，更新map
-                    //onsole.log(dbGeoJson);  //这里已经传回一个json对象
+                    console.log(dbGeoJson);  //这里已经传回一个json对象
                     //var parsedJson = jQuery.parseJSON(msg);
                     //var parsedJson = eval('('+msg+')');
                     //console.log(parsedJson);
                     $("#loadgif").hide();
                     //添加到到图层
+                    //dbVecLayer.source.addFeature((new ol.format.GeoJSON()).readFeatures(dbGeoJson));
+
                     var dbVecLayer = new ol.layer.Vector({
                         title: 'db vevtor Layer',
                         source: new ol.source.Vector({
                             projection: 'EPSG:4326',
                             features: (new ol.format.GeoJSON()).readFeatures(dbGeoJson)
                         })
-                    })
-                    //console.log(map.getLayers());
+                    });
                     map.addLayer(dbVecLayer);
                 },
                 error: function () {  //请求失败的回调方法
