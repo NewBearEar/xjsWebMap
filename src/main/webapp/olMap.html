@@ -179,13 +179,13 @@
                 $.ajax({
                     url:autoCompleteUrl,
                     dataType:"json",
-                    type:"get",    //get请求
+                    type:"post",    //get请求
                     data: {
                         searchTxt: request.term    //request.term传递当前参数
                     },
                     minLength:1,
                     success:function (result) {
-                        response(result);
+                        response(result);  //向页面相应
                     }
                 })
             }
