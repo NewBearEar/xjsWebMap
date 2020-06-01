@@ -58,7 +58,7 @@ html,body{
     margin-left: 10px;
 }
 
-#searchBar input{
+#searchTxt{
     border: none;
 
     font-size: 15px;
@@ -70,7 +70,7 @@ html,body{
     padding-top: 5px;
     padding-bottom: 5px;
 }
-#searchBar button{
+#btn{
     float: right;
     border: none;
     background: #c5464a;
@@ -82,12 +82,12 @@ html,body{
     cursor: pointer;/*设置鼠标箭头手势*/
 
 }
-#searchBar button:before{
+#btn:before{
     content: "搜索";
     font-family: FontAwesome;
     font-size: 16px;
     color: #f9f0da;
 }
-#searchBar button:hover{
+#btn:hover{
     background-color: antiquewhite;
 }

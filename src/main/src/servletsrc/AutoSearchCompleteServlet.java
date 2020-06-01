@@ -41,8 +41,8 @@ public class AutoSearchCompleteServlet extends HttpServlet {
         response.setCharacterEncoding("utf-8");
         //获取查询
         //查询基础语句,先查询城市中文名试试
-        String sqlBase = "select id,name "+
-                "from xianch_point ";
+        String sqlBase = "select gid,name,pinyin "+
+                "from all_city_county ";
         String sql = "";
         if(!"".equals(searchTxt) || searchTxt!=null) {   //判断查询参数是否为空，利用“”字符串常量调用equals方法，避免searchTxt为null调用equals抛出异常，equals会处理参数为null的情况
             //这里不能使用逻辑运算符==或！=比较，因为只比较了引用是否相等，注意String Pool

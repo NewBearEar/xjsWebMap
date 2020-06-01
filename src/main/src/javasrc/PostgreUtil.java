@@ -64,6 +64,7 @@ public class PostgreUtil extends DatabaseUtil { //postgis连接工具类
     }
     //public static
     public static ArrayList<String> parseResult2String(ResultSet resultSet){
+        //要求sql用的是json_build_object进行查询得到的ResultSet
         String jsonString = null;
         ArrayList<String> jsonStringList = new ArrayList<String>();
         try {
@@ -71,7 +72,7 @@ public class PostgreUtil extends DatabaseUtil { //postgis连接工具类
             //String filePath = "E:\\1.json";
             //FileOutputStream fos = new FileOutputStream(filePath);
             while(resultSet.next()){
-                jsonString = resultSet.getString("json_build_object");
+                jsonString = resultSet.getString("json_build_object");   //
                 jsonStringList.add(jsonString);
                 //System.out.println(jsonString);
             }

@@ -21,7 +21,7 @@
         /*基于juery ui css
         /*自动补全loading*/
         .ui-autocomplete-loading {
-            background: white url('dist/jquery-ui-1.11.4/images/ui-anim_basic_16x16.gif') right center no-repeat;
+            background: white url('dist/jquery-ui-1.12.1/images/ui-anim_basic_16x16.gif') right center no-repeat;
         }
         .ui-autocomplete{
             width: 290px;
@@ -58,11 +58,11 @@
     </div>
     <div id="left-panel" class style="height: 807px">
         <div id = searchBar >
-            <form id="formSearch"  action="/xjs/getGeoJson">      <!--action="getGeoJson"   不需要action-->
+            <form id="formSearch" action="" onsubmit="return false;" >   <!--οnsubmit="return false;"阻止提交,注意写的时候引号里面不能是绿色字符串，必须变色才能识别到里面的js代码-->   <!--action="getGeoJson"     action="/xjs/getGeoJson"   不需要action-->
                 <img src="img/searchimg.png" alt="">
-                <input type="text" id="searchTxt" name="searchTxt" placeholder="输入搜索城市名" >
+                <input type="text" id="searchTxt" name="searchTxt" placeholder="输入搜索城市名" onkeydown="if(event.keyCode==13) {$('#btn').click();}" > <!--回车调用搜索按钮的click事件-->
                     <!--onblur="if(this.value == '') this.value='在此输入您要查找的内容，点击搜索';"-->
-                <button type="button" id="btn" value="搜索"></button>
+                <input type="button" id="btn" value="搜索"></input>
             </form>
         </div>
     </div>
@@ -80,12 +80,12 @@
         })
 
         //按钮单击事件
-        $('#btn').click(function() {
+        $('#btn').click(function ajaxConfirm() {  //函数必须放在btn的click里面否则会一直调用
             $("#loadgif").show();
             //console.log($('#form2').serialize());  为什么这个函数得不到数据
             //获取表单对话框内容
             var searchTxtValue = $('#searchTxt').val();   //val()而不是value()
-            console.log(searchTxtValue);
+            //console.log(searchTxtValue);
 
             $.ajax({  //AJAX向Servlet发送get请求，请求后台数据库数据
                 url: "getGeoJson", // url不带/就是当前路径（因为我这个html放在webapp目录下），而且在页面上访问时已经包含application context，相当于/xjs/getGeoJson
@@ -117,10 +117,12 @@
             });
         });
 
-        //jquery-ui自动补全
+        //jquery-ui自动补全，输入内容自动补全时，调用
         var autoCompleteUrl = "autoComplete";
         $("#searchTxt").autocomplete({
-            source: function (request,response) {
+            maxResults:10,   //自定义属性，最多显示条数,设置默认最多补全10条
+            source: function (request,response) {  //response是相应参数
+                var mapResults = this.options.maxResults;//利用变量将外部dom对象的maxResults传进ajax
                 $.ajax({
                     url:autoCompleteUrl,
                     dataType:"json",
@@ -130,12 +132,20 @@
                     },
                     minLength:1,
                     success:function (result) {
-                        response(result);  //向页面相应
+                        response(result.slice(0,mapResults));  //向response响应输出内容  //slice筛选前十个
                     }
                 })
-            }
-
-        })
+            },
+            response: function (event,ui) {   //这里的response属性名,这是在搜索完成后菜单显示前触发
+                //不需要这里在这里回掉
+                //console.log(ui);   //ui就是包含上述10条内容的对象
+            },
+            select: function (event,ui) {  //某一条被选择时触发
+                //这里直接调用btn的click ，ajax提交
+                $("#btn").click();
+            },
+            
+        });
 
 
     </script>
