@@ -6,103 +6,46 @@
     <meta name="renderer" content="webkit|blink"/>
     <meta name="force-rendering" content="webkit|blink"/>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1"/>
+
+    <script type="text/javascript" src="dist/oldist/openlayers/ol.js"></script>
+    <script type="text/javascript" src="dist/jquery/jquery-3.5.1.js"></script>
+    <script type="text/javascript" src="dist/jquery-ui-1.12.1/jquery-ui.js"></script>
+
+
+    <!--js放在css文件前，防止css样式被js刷掉-->
+    <!--链接式导入css-->
     <link rel="stylesheet" href="dist/oldist/openlayers/ol.css" type="text/css">
-    <link rel="stylesheet" href="dist/jquery-ui-1.11.4/jquery-ui.css" type="text/css">
+    <link rel="stylesheet" href="dist/jquery-ui-1.12.1/jquery-ui.css" type="text/css">
+    <link rel="stylesheet" href="css/myMapStyle.css" type="text/css">
     <style>
-        html,body{
-            height: 100%;
-            margin: 0;
-            padding: 0;
-        }
-        #mapTitleBox{
-            position:absolute;
-            left: 50%;
-            transform: translate(-50%);
-            z-index: 1;   /*用于调整压盖顺序*/
-        }
-        #map {
-            clear: both;
-            position: relative;
-            height: 100%;
-            width: 100%;
-            /*border: 1px solid rgb(78, 78, 78);*/
-        }
-        #loaction{
-            position: absolute;
-            left: 90%;
-            z-index: 1;
-        }
-        #searchBar {
-            position:absolute;
-            left: 50%;
-            transform: translate(-50%);
-            z-index: 1;   /*用于调整压盖顺序*/
-            text-align: center;
-            vertical-align: -2px;
-        }
-
-        #searchBar input{
-            border: 2px solid #c5464a;
-            border-radius: 10px 3px 3px 10px;
-            background: transparent;
-            outline: none;
-            vertical-align: 2px;
-            
-        }
-        #searchBar button{
-            border: none;
-            background: #c5464a;
-            border-radius: 0 20px 20px 0;
-            width: 60px;
-            top:0;
-            right: 0;
-            outline: none;
-            cursor: pointer;/*设置鼠标箭头手势*/
-
-        }
-        #searchBar button:before{
-            content: "搜索";
-            font-family: FontAwesome;
-            font-size: 16px;
-            color: #f9f0da;
-        }
-        #searchBar button:hover{
-            background-color: antiquewhite;
-        }
+        /*基于juery ui css
         /*自动补全loading*/
         .ui-autocomplete-loading {
             background: white url('dist/jquery-ui-1.11.4/images/ui-anim_basic_16x16.gif') right center no-repeat;
         }
-        /*
-        #btn{
+        .ui-autocomplete{
+            width: 290px;
+            left: 50px;
 
-            width: auto;
-            height: 50px;
-            color:white;
-            background-color:cornflowerblue;
-            border-radius: 3px; /*让按钮变得圆滑一点*/
-        /*
-            border-width: 0; /*消去丑陋边框*/
-        /*
-            margin: 0;
-            outline: none;/*取消轮廓*/
-        /*
-            font-size: 25px;
-            font-family:KaiTi;
-            text-align: center;/*字体居中*/
-        /*
-            cursor: pointer;/*设置鼠标箭头手势*/
-        /*
+            /*试试阴影效果*/
+            filter: progid:DXImageTransform.Microsoft.shadow(color=#909090,direction=120,strength=2);
+            -moz-box-shadow: 1px 1px 5px #909090;
+            -webkit-box-shadow: 1px 1px 5px #909090;
+            box-shadow: 1px 1px 5px #909090;
+            border-color: rgb(200,200,200);
         }
-        #btn:hover{
-            background-color: antiquewhite;
+        /*重写选中时的样式*/
+        .ui-state-active:hover {
+            border: 1px solid rgb(200,200,200);
+            background: rgb(238,238,238);
+            font-weight: normal;
+            color: #000000;  /*字体颜色黑色不变*/
+
         }
-        */
+
 
     </style>
-    <script type="text/javascript" src="dist/oldist/openlayers/ol.js"></script>
-    <script type="text/javascript" src="dist/jquery1.6.4/jquery.js"></script>
-    <script type="text/javascript" src="dist/jquery-ui-1.11.4/jquery-ui.js"></script>
+
     <!--
     <script type="text/javascript" src="http://apps.bdimg.com/libs/jquery/1.6.4/jquery.js"></script>
     -->
@@ -113,13 +56,15 @@
     <div id="loadgif" style="position:absolute;top:45%;left:45%;z-index: 1">
         　　<img alt="加载中..." src="img/loading2.gif"/>
     </div>
-    <div id = searchBar >
-        <form id="formSearch"  action="/xjs/getGeoJson">      <!--action="getGeoJson"   不需要action-->
-            <input type="text" id="searchTxt" name="searchTxt" placeholder="输入城市名">
-                <!--onblur="if(this.value == '') this.value='在此输入您要查找的内容，点击搜索';"-->
-            <button type="button" id="btn" value="点击这里查找数据库数据"></button>
-        </form>
-
+    <div id="left-panel" class style="height: 807px">
+        <div id = searchBar >
+            <form id="formSearch"  action="/xjs/getGeoJson">      <!--action="getGeoJson"   不需要action-->
+                <img src="img/searchimg.png" alt="">
+                <input type="text" id="searchTxt" name="searchTxt" placeholder="输入搜索城市名" >
+                    <!--onblur="if(this.value == '') this.value='在此输入您要查找的内容，点击搜索';"-->
+                <button type="button" id="btn" value="搜索"></button>
+            </form>
+        </div>
     </div>
     <div id="map" class="map" ></div>
     <div id="wrapper">
@@ -144,7 +89,7 @@
 
             $.ajax({  //AJAX向Servlet发送get请求，请求后台数据库数据
                 url: "getGeoJson", // url不带/就是当前路径（因为我这个html放在webapp目录下），而且在页面上访问时已经包含application context，相当于/xjs/getGeoJson
-                dataTpye: "json",   //传输json
+                dataType: "json",   //传输json
                 data:  {searchTxt:searchTxtValue},   //$('#form2').serialize(),  //按键值对形式
                 type: "get",
                 success: function (dbGeoJson) {  //回调函数，更新map

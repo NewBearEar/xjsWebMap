@@ -1,0 +1,93 @@
+html,body{
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+#mapTitleBox{
+    position:absolute;
+    left: 50%;
+    transform: translate(-50%);
+    z-index: 1;   /*用于调整压盖顺序*/
+}
+#map {
+    clear: both;
+    position: relative;
+    height: 100%;
+    width: 100%;
+    /*border: 1px solid rgb(78, 78, 78);*/
+}
+#loaction{
+    position: absolute;
+    left: 90%;
+    z-index: 1;
+}
+#left-panel{
+    position:absolute;
+    left: 50px;
+    top: 10px;
+    height: 807px;
+    width: 290px;
+    z-index: 1;   /*用于调整压盖顺序*/
+    text-align: center;
+    vertical-align: -2px;
+}
+#searchBar {
+    background-color: #ffffff;
+    position:absolute;
+    height: 40px;
+    width: 290px;
+    /*试试阴影效果*/
+    filter: progid:DXImageTransform.Microsoft.shadow(color=#909090,direction=120,strength=4);
+    -moz-box-shadow: 2px 2px 10px #909090;
+    -webkit-box-shadow: 2px 2px 10px #909090;
+    box-shadow: 2px 2px 10px #909090;
+    z-index: 1;   /*用于调整压盖顺序*/
+    text-align: center;
+}
+#searchBar form{
+    position: relative;
+    text-align: center;
+    line-height: 30px;
+    margin: 0px auto;
+    height: 100%;
+    background-color: white;
+}
+#searchBar img{
+    float: left;
+    margin-top: 8px;
+    margin-left: 10px;
+}
+
+#searchBar input{
+    border: none;
+
+    font-size: 15px;
+    border-radius: 3px;
+    height: 30px;
+    outline: none;
+    float: left;
+    padding-left: 10px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+#searchBar button{
+    float: right;
+    border: none;
+    background: #c5464a;
+    height: 40px;
+    width: auto;
+    color: white;
+    border-radius: 3px;
+    outline: none;
+    cursor: pointer;/*设置鼠标箭头手势*/
+
+}
+#searchBar button:before{
+    content: "搜索";
+    font-family: FontAwesome;
+    font-size: 16px;
+    color: #f9f0da;
+}
+#searchBar button:hover{
+    background-color: antiquewhite;
+}
