@@ -1,11 +1,7 @@
 package javasrc;
 
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.Statement;
+import java.io.*;
+import java.sql.*;
 import java.util.ArrayList;
 
 public class PostgreUtil extends DatabaseUtil { //postgis连接工具类
@@ -24,6 +20,38 @@ public class PostgreUtil extends DatabaseUtil { //postgis连接工具类
         ArrayList<String> jsonStringList = parseResult2String(queryResult);
         System.out.println(jsonStringList.get(0));
         closeDbConn(testConn);*/
+
+        //试试上传图片
+        String url = "jdbc:postgresql://47.94.150.127:5432/chn_test";
+        String user = "postgres";
+        String passwd = "xiong123";
+        Connection testConn = getDbConn(url,user,passwd);
+        String sql = "insert into all_city_county(image_name,image) values(?,?)";
+        PreparedStatement ps = null;
+
+        try {
+            ps = testConn.prepareStatement(sql);
+
+            // 设置图片名称
+            ps.setString(1, "defaultImage");
+
+            // 设置图片文件
+            File file = new File("D:\\xWebMap/src/main/webapp/img/defaultImg.jpg");
+            FileInputStream inputStream = new FileInputStream(file);
+            ps.setBinaryStream(2, inputStream, (int) file.length());
+
+            // 执行SQL
+            ps.execute();
+            ps.close();
+
+            System.out.println(" 已上传");
+
+        } catch (SQLException e) {
+            System.err.println("SQL " + sql + " 错误");
+        } catch (FileNotFoundException e) {
+            System.err.println("图片 "+ " 没有找到");
+        }
+
     }
 
 

@@ -24,14 +24,14 @@
             background: white url('dist/jquery-ui-1.12.1/images/ui-anim_basic_16x16.gif') right center no-repeat;
         }
         .ui-autocomplete{
-            width: 290px;
+            width: 250px;
             left: 50px;
-
+            padding: 0;
             /*试试阴影效果*/
             filter: progid:DXImageTransform.Microsoft.shadow(color=#909090,direction=120,strength=2);
-            -moz-box-shadow: 1px 1px 5px #909090;
-            -webkit-box-shadow: 1px 1px 5px #909090;
-            box-shadow: 1px 1px 5px #909090;
+            -moz-box-shadow: 1px 1px 3px #909090;
+            -webkit-box-shadow: 1px 1px 3px #909090;
+            box-shadow: 1px 1px 3px #909090;
             border-color: rgb(200,200,200);
         }
         /*重写选中时的样式*/
@@ -56,15 +56,18 @@
     <div id="loadgif" style="position:absolute;top:45%;left:45%;z-index: 1">
         　　<img alt="加载中..." src="img/loading2.gif"/>
     </div>
-    <div id="left-panel" class style="height: 807px">
+    <div id="left-panel" class style="height: 850px">
         <div id = searchBar >
             <form id="formSearch" action="" onsubmit="return false;" >   <!--οnsubmit="return false;"阻止提交,注意写的时候引号里面不能是绿色字符串，必须变色才能识别到里面的js代码-->   <!--action="getGeoJson"     action="/xjs/getGeoJson"   不需要action-->
                 <img src="img/searchimg.png" alt="">
-                <input type="text" id="searchTxt" name="searchTxt" placeholder="输入搜索城市名" onkeydown="if(event.keyCode==13) {$('#btn').click();}" > <!--回车调用搜索按钮的click事件-->
+                <input type="text" id="searchTxt" name="searchTxt" placeholder="输入搜索城市名" onkeydown="if(event.keyCode==13) {$('#btn').click(); $('#searchTxt').autocomplete('close'); }" > <!--回车调用搜索按钮的click事件并关闭autocomplete-->
                     <!--onblur="if(this.value == '') this.value='在此输入您要查找的内容，点击搜索';"-->
                 <input type="button" id="btn" value="搜索"></input>
             </form>
         </div>
+        <ul id="cards-level0" class="cardlist"></ul>
+        <ul id="cards-level1" class="cardlist"></ul>
+        <ul id="cards-level2" class="cardlist"></ul>
     </div>
     <div id="map" class="map" ></div>
     <div id="wrapper">
@@ -93,22 +96,26 @@
                 data:  {searchTxt:searchTxtValue},   //$('#form2').serialize(),  //按键值对形式
                 type: "get",
                 success: function (dbGeoJson) {  //回调函数，更新map
-                    console.log(dbGeoJson);  //这里已经传回一个json对象
-                    //var parsedJson = jQuery.parseJSON(msg);
-                    //var parsedJson = eval('('+msg+')');
-                    //console.log(parsedJson);
-                    $("#loadgif").hide();
-                    //添加到到图层
-                    //dbVecLayer.source.addFeature((new ol.format.GeoJSON()).readFeatures(dbGeoJson));
+                    $("#loadgif").hide();  //隐藏加载动画
+                    //console.log(dbGeoJson);  //这里已经传回一个json对象
+                    if($.isEmptyObject(dbGeoJson)){   //判断返回对象是否为空对象
+                        alert("未查询到相关内容");
+                    }else {
+                        //添加到到图层
+                        //dbVecLayer.source.addFeature((new ol.format.GeoJSON()).readFeatures(dbGeoJson));
+                        //改到initMap定义图层，现在只需要重新加载数据源
 
-                    var dbVecLayer = new ol.layer.Vector({
-                        title: 'db vevtor Layer',
-                        source: new ol.source.Vector({
-                            projection: 'EPSG:4326',
-                            features: (new ol.format.GeoJSON()).readFeatures(dbGeoJson)
-                        })
-                    });
-                    map.addLayer(dbVecLayer);
+                        //调用函数更新图层要素
+                        updateDbVeclayerFeatures(dbGeoJson);
+                        //调用函数添加list
+                        addShowCardAndPoiList(dbGeoJson);
+                        //最后判断图层是否可见，不可见则设置为可见
+                        if(!dbVecLayer.getVisible()){
+                            dbVecLayer.setVisible(true);
+                        }
+                        //console.log(map.getLayers());
+                        //map.addLayer(dbVecLayer);
+                    }
                 },
                 error: function () {  //请求失败的回调方法
                     $("#loadgif").hide();
@@ -144,9 +151,104 @@
                 //这里直接调用btn的click ，ajax提交
                 $("#btn").click();
             },
-            
+
         });
 
+        var updateDbVeclayerFeatures = function (dbGeoJson) {  //传入GeoJson对象
+            //重新加载图层数据源
+            var dbVecSourceTemp = dbVecLayer.getSource(); //获取数据源
+            dbVecSourceTemp.forEachFeature(function (feature) {
+                dbVecSourceTemp.removeFeature(feature);   //对每一个feature进行移除
+            })
+            dbVecSourceTemp.addFeatures((new ol.format.GeoJSON()).readFeatures(dbGeoJson));   //向数据源添加新features  (new ol.format.GeoJSON()).readFeatures(dbGeoJson)
+        }
+
+        var addShowCardAndPoiList = function (dbGeoJson) {
+            //向列表中添加card，并添加poilist
+            if ($("#cards-level1").length != 0){
+                $("#cards-level1").empty();   //清空既有元素
+            }
+            //获取Fetures数组
+            var featureArray = dbGeoJson.features;
+            console.log(featureArray);
+            //创建card
+            $("#cards-level1").append("<li id='card-1'></li>" );
+            //添加属性，先写个1试试
+            var datafoldStr = "共找到"+ featureArray.length +"个搜索结果";
+            $("#card-1").attr("class","card animated-card","data-fold",datafoldStr);
+            //创建card里面显示poi的容器
+            $("#card-1").append("<div id='show-wrapper' class='poi-wrapper'></div>");  //可以包含poilist在内的多种信息
+            //创建展示的list
+            $("#show-wrapper").append("<ul id='show-poilist' class='poilist'></ul>");
+
+
+
+            //动态创建元素
+            var dynamicId = 0;  //动态列表id号
+            for(var i = 0;i < featureArray.length;i++){  //这里写死了显示的几个字段
+                /*
+                //取对象的一部分，可以如下操作：
+                // 不需要的属性放前面，rest就是剩下的
+                //var {b,c,...rest} = obj
+                //console.log(rest)
+                */
+                dynamicId = i;
+                var attr = featureArray[i].properties; //返回属性对象
+                var name = attr.name;
+                var pinyin = attr.pinyin;
+                var intro = attr.intro;
+                if(attr.image == null){
+                    var image = "No Image";
+                }else {
+                    var image = attr.image;   //暂定，待修改
+                }
+                var showAttributionArray = [dynamicId,name,pinyin,intro,image]; //需要显示信息的数组
+                console.log(showAttributionArray);
+                if(i<5){
+                    addPoiLine("show-poilist",showAttributionArray,i);
+                }
+            }
+
+            //为ul的每个li动态绑定事件，实现选中样式
+            console.log($("#show-poilist li"));
+            $("#show-poilist li").on('mouseover',function () {
+                $(this).addClass('show-poiline-mouseover');  //mouseover事件时添加类名到li元素，用于css显示
+            }).on('mouseout',function () {
+                $(this).removeClass('show-poiline-mouseover');
+            }).on('click',function () {
+                $('.show-poiline-selected').removeClass('show-poiline-selected');
+                $(this).addClass('show-poiline-selected');
+            })
+
+            if(featureArray.length>5){
+                //显示详细信息
+                //跟ul show-poilist 同一级
+                $("#show-poilist").append("<li class='poi-focuscase'>");
+                $("#show-poilist").children(".poi-focuscase").append("<span class='focuscase-more'>"+"点击查看全部"+featureArray.length+"条结果"+"</span>");
+            }
+
+        }
+        var addPoiLine = function(parentNodeId,showAttributionArray,rowIndex){
+            //需要参数：待添加节点的id，需要显示信息的数组,行号
+            $("#"+parentNodeId).append("<li id=poi-line-"+rowIndex+"></li>");
+            $("#poi-line-"+rowIndex).attr("class","poi-linebox");
+
+            //添加li下面的各种div
+            //添加图片结构
+                $("#poi-line-"+rowIndex).append("<div id=poi-imgbox-"+ rowIndex+" class='poi-imgbox'></div>");
+                    $("#poi-imgbox-"+rowIndex).append("<span id=poi-img-"+rowIndex +" class='poi-img'>暂无图片</span>"); //试试
+                //$("#poi-img-"+rowIndex).attr("style","")
+                //添加info结构
+                $("#poi-line-"+rowIndex).append("<div id=poi-info-left-"+ rowIndex+" class='poi-info-left'></div>"); //加上box
+                    $("#poi-info-left-"+rowIndex).append("<h3 class='poi-title'>")
+                        $("#poi-info-left-"+rowIndex).children(".poi-title").append("<span id='poi-name-cn' class='poi-name' title="+showAttributionArray[1]+">"+(showAttributionArray[0]+1)+"."+showAttributionArray[1]+"</span>");
+                        $("#poi-info-left-"+rowIndex).children(".poi-title").append("<span id='poi-name-pinyin' class='poi-name' title="+showAttributionArray[2]+">"+showAttributionArray[2]+"</span>");
+                    //详细介绍
+                    $("#poi-info-left-"+rowIndex).append("<div class='poi-info'>");
+                        $("#poi-info-left-"+rowIndex).children(".poi-info").append("<p class='poi-introduction'>"+showAttributionArray[3] +"</p>");
+
+
+        }
 
     </script>
 </body>

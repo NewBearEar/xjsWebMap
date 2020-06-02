@@ -42,7 +42,7 @@ public class GeoJsonServlet extends HttpServlet {
         String sql = "";
         if(!"".equals(searchTxt) || searchTxt!=null) {   //判断查询参数是否为空，利用“”字符串常量调用equals方法，避免searchTxt为null调用equals抛出异常，equals会处理参数为null的情况
             //这里不能使用逻辑运算符==或！=比较，因为只比较了引用是否相等，注意String Pool
-            sql = sqlBase + "where name like " + "\'%" + searchTxt + "%\'";    //先支持城市名称的模糊查询试试
+            sql = sqlBase + "where name like " + "\'" + searchTxt + "%\'";    //先支持城市名称的模糊查询试试  //模糊查询只匹配后面的
             System.out.println(sql);   //看看sql语句
         }else {
             sql = sqlBase;
@@ -50,19 +50,26 @@ public class GeoJsonServlet extends HttpServlet {
         }
         ResultSet queryResult = PostgreUtil.getResultSet(testConn,sql);
         if (queryResult == null){
-
+            return;
         }else {
             ArrayList<String> jsonStringList = PostgreUtil.parseResult2String(queryResult);  //获取json字符串list
+
             //System.out.println(jsonStringList.get(0));
             String jsonStringTest = jsonStringList.get(0);  //只有一个对象，取第一个对象
             //输出流生成之前，设置数据集编码方式
             response.setCharacterEncoding("UTF-8");
             response.setContentType("application/json; charset=utf-8");
-            //生成输出流
-            PrintWriter out = response.getWriter();
-            out.print(jsonStringTest);
-            out.flush();
-            out.close();   //关闭输出流
+
+            if (jsonStringTest.contains("\"features\" : null")) {
+                //判断如果features为null
+                response.getWriter().print("{}"); //未搜索到内容，范围空对象
+            } else {
+                //生成输出流
+                PrintWriter out = response.getWriter();
+                out.print(jsonStringTest);
+                out.flush();
+                out.close();   //关闭输出流
+            }
         }
         PostgreUtil.closeDbConn(testConn);   //关闭数据库连接
     }

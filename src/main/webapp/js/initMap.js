@@ -87,10 +87,22 @@ var initLayers = function (){
             // 注意，当servlet正确输出时，这里也可以直接填写servlet的url，不需要利用(ajax)请求返回数据，再用readFeatures方法来加载json对象了
             format: new ol.format.GeoJSON()
         })
-    })
+    });
+
+    //用于创建图层的默认Json字符，没实际意义
+    var defaultGeoJsonStr = "{\"type\" : \"FeatureCollection\", \"features\" : [{\"type\": \"Feature\", \"geometry\": {\"type\":\"Point\",\"coordinates\":[122.53233,52.968872]}, \"properties\": {\"gid\": 1, \"area\": 0.000000000000000, \"perimeter\": 0.000000000000000, \"cntypt_\": 1, \"cntypt_id\": 31, \"name\": \"漠河县\", \"pyname\": \"Mohe Xian\", \"class\": \"AI\", \"id\": 1031, \"pn\": 1, \"adcode93\": 232723}}]}";
+    var defaultGeoJsonObj = eval('('+defaultGeoJsonStr+')');
+    //数据库查询图层
+    dbVecLayer = new ol.layer.Vector({
+        visible: false,   //默认不可见，查询之后改为可见
+        title: 'db vevtor Layer',
+        source: new ol.source.Vector({
+            projection: 'EPSG:4326',
+            features: (new ol.format.GeoJSON().readFeatures(defaultGeoJsonObj)),
+        })
+    });
 
     /*
-    //数据库查询图层
     dbVecLayer = new ol.layer.Vector({
         title: 'db vevtor Layer',
         source: new ol.source.Vector({
@@ -99,7 +111,7 @@ var initLayers = function (){
         })
     })*/
 
-    var mlayers = [osmtile,tiled,jsonVecLayer,provinceAnotation];  //dbVecLayer];  //图层数组
+    var mlayers = [osmtile,tiled,jsonVecLayer,dbVecLayer,provinceAnotation];  //dbVecLayer];  //图层数组
     return mlayers;
 }
 

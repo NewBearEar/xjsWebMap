@@ -15,6 +15,7 @@ html,body{
     height: 100%;
     width: 100%;
     /*border: 1px solid rgb(78, 78, 78);*/
+
 }
 #loaction{
     position: absolute;
@@ -26,10 +27,13 @@ html,body{
     left: 50px;
     top: 10px;
     height: 807px;
-    width: 290px;
+    width: 330px;
     z-index: 1;   /*用于调整压盖顺序*/
     text-align: center;
     vertical-align: -2px;
+
+    overflow: hidden;
+    /*pointer-events: none;    这句话让整个box不能处理鼠标事件*/
 }
 #searchBar {
     background-color: #ffffff;
@@ -38,9 +42,9 @@ html,body{
     width: 290px;
     /*试试阴影效果*/
     filter: progid:DXImageTransform.Microsoft.shadow(color=#909090,direction=120,strength=4);
-    -moz-box-shadow: 2px 2px 10px #909090;
-    -webkit-box-shadow: 2px 2px 10px #909090;
-    box-shadow: 2px 2px 10px #909090;
+    -moz-box-shadow: 1px 1px 10px #909090;
+    -webkit-box-shadow: 1px 1px 10px #909090;
+    box-shadow: 1px 1px 10px #909090;
     z-index: 1;   /*用于调整压盖顺序*/
     text-align: center;
 }
@@ -90,4 +94,167 @@ html,body{
 }
 #btn:hover{
     background-color: antiquewhite;
+}
+
+#cards-level1{
+
+}
+.cardlist{
+    width: 290px;
+    position: absolute;
+    top: 30px;
+    padding: 0;
+    margin-top: 15px;
+}
+
+
+
+.card{
+    pointer-events: auto;
+    width: 100%;
+
+
+    margin-top: 10px;
+    box-sizing: border-box;
+    padding: 5px;
+    background: #fff;
+    box-shadow: 1px 2px 1px rgba(0,0,0,.15);
+    overflow: auto;
+    overflow-x: hidden;
+    position: relative;
+    border-radius: 2px;
+    -webkit-transition: max-height .5s;
+    transition: max-height .5s;
+    z-index: 2;
+    max-height: 806px;
+}
+
+.card.animated-card {
+    -webkit-animation-name: card-drop;
+    animation-name: card-drop;
+    -webkit-animation-duration: .5s;
+    animation-duration: .5s;
+}
+div{
+    display: block;
+}
+.poi-linebox {
+    position: relative;
+    border-top: 1px solid #eaeaea;
+    padding: 10px 0;
+    cursor: pointer;
+}
+
+.poi-linebox .poi-imgbox {   /*这里poi-linebox类似高德的poibox层次*/
+    width: 100px;
+    height: 74px;
+    vertical-align: top;
+    float: right;
+    margin: 0 8px;
+    overflow: hidden;
+}
+/*
+.poi-linebox .poi-img {
+    display: inline-block;
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: 50%;
+}
+ */
+ul {
+    display: block;
+    list-style-type: disc;
+    margin-block-start: 1em;
+    margin-block-end: 1em;
+    margin-inline-start: 0px;
+    margin-inline-end: 0px;
+    padding-inline-start: 40px;
+}
+
+li {
+    display: list-item;
+    text-align: -webkit-match-parent;
+}
+#show-wrapper {
+    padding: 0 15px;
+}
+
+body, legend, ol, td, th, ul {
+    padding: 0;
+}
+
+ol, ul {
+    list-style: none;
+}
+
+.poi-linebox .poi-info-left {
+    max-width: 320px;
+    padding-left: 8px;
+}
+
+.poi-linebox .poi-title {
+    overflow: hidden;
+}
+.poi-linebox .poi-name {
+    float: left;
+    max-width: 200px;
+    height: 22px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    margin-top: 1px;
+}
+.poi-linebox .poi-info {
+    margin: 4px 0;
+    overflow: hidden;
+}
+h3 {
+    display: block;
+    font-size: 1.17em;
+    margin-block-start: 1em;
+    margin-block-end: 1em;
+    margin-inline-start: 0px;
+    margin-inline-end: 0px;
+    font-weight: bold;
+}
+.poi-linebox .poi-info p {
+    color: #999;
+    line-height: 20px;
+    max-height: 78px;
+    text-overflow: ellipsis;
+    max-width: 285px;
+    overflow: hidden;
+    font-family: Tahoma;
+}
+p {
+    display: block;
+    margin-block-start: 1em;
+    margin-block-end: 1em;
+    margin-inline-start: 0px;
+    margin-inline-end: 0px;
+}
+.poi-focuscase {
+    margin-bottom: 6px auto;
+    text-align: center;
+}
+.poi-focuscase .focuscase-more {
+    display: block;
+    min-width: 60px;
+    padding: 5px 16px;
+    color: #08f;
+    text-decoration: underline;
+    cursor: pointer;
+}
+#left-panel {
+    font-size: 12px;
+    line-height: 1.5;
+    color: #565656;
+    word-wrap: break-word;
+}
+.show-poiline-mouseover{
+
+    background: rgb(238,238,238);
+    font-weight: normal;
+    color: #000000;  /*字体颜色黑色不变*/
 }
