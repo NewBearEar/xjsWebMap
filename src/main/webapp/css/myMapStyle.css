@@ -112,8 +112,6 @@ html,body{
 .card{
     pointer-events: auto;
     width: 100%;
-
-
     margin-top: 10px;
     box-sizing: border-box;
     padding: 5px;
@@ -235,7 +233,7 @@ p {
     margin-inline-end: 0px;
 }
 .poi-focuscase {
-    margin-bottom: 6px auto;
+    margin-bottom: auto;
     text-align: center;
 }
 .poi-focuscase .focuscase-more {
