@@ -22,3 +22,27 @@ html,body{
     left: 90%;
     z-index: 1;
 }
+/*鹰眼控件展开时控件外框的样式*/
+.ol-custom-overviewmap:not(.ol-collapsed){
+    border: 1px solid black;
+}
+.ol-custom-overviewmap{
+    right: .5em;
+    left: auto;
+}
+/*鹰眼控件中地图容器的样式*/
+.ol-custom-overviewmap .ol-overviewmap-map{
+    border:none;
+}
+/*鹰眼控件中显示当前窗口中主区域的边框*/
+.ol-custom-overviewmap .ol-overviewmap-box{
+    border: 2px dashed #c5464a;
+}
+/*鹰眼控件展开时其控件的按钮图标*/
+.ol-custom-overviewmap:not(.ol-collapsed) button{
+    bottom: auto;
+    left: auto;
+    right:1px;
+    top:1px;
+}
+

@@ -10,21 +10,13 @@ var untiled;   //WMS服务
 var provinceAnotation; //省注记
 var dbVecLayer;  //查询图层
 var map; //地图
+var jsonUrl;
+var jsonVecLayer;
 var dbSourceVec;   //数据库矢量数据源
 var initMap = function(){
     //设置地图范围
 
-    var mlayers = initLayers();
-
-    var overviewMapControl = new ol.control.OverviewMap({
-        //className:'ol-overviewmap ol-custom-overviewmap',  //控制鹰眼图样式
-        layers:mlayers,
-        view: new ol.View({
-            projection: 'EPSG:4326',
-            center: [115, 39],
-            zoom: 2
-        }),
-    });
+    var mlayers = initLayers();  //里面的图层其实不应该使用全局变量，但先用着
     /*
     controls: ol.control.defaults({
         attributionOptions: {
@@ -34,19 +26,18 @@ var initMap = function(){
 
     //定义地图对象//地图对象
     map = new ol.Map({
-        controls:ol.control.defaults().extend([overviewMapControl]),
+        controls:ol.control.defaults({
+            //删除右下角商标栏
+            attribution:false
+        }),
         layers: mlayers,
         target: 'map',
         view: new ol.View({
             projection: 'EPSG:4326',
-            center: [115, 39],
+            //center: [115, 39],
             zoom: 4
         }),
-
-
     });
-
-
 
     initOlTools(mlayers); //初始化工具
 
@@ -58,7 +49,7 @@ var initLayers = function (){
     osmtile =  new ol.layer.Tile({
         visible:true,
         source: new ol.source.OSM({
-            maxZoom:4
+            //maxZoom:4
         })
     });
     //瓦片图层
@@ -91,11 +82,11 @@ var initLayers = function (){
     });
 
     //JSON图层
-    var jsonUrl = "data/GeoJSON_HB.json" ;   //   "data/GeoJSON_HB.json";  //相对路径取决于调用js的网页的location，而不取决于js文件的项目路径和url
+    jsonUrl = "data/GeoJSON_HB.json" ;   //   "data/GeoJSON_HB.json";  //相对路径取决于调用js的网页的location，而不取决于js文件的项目路径和url
     console.log(document.location.toString());  //查看当前url
     //var testServletUrl = "getGeoJson";
     //Json读取
-    var jsonVecLayer = new ol.layer.Vector({
+    jsonVecLayer = new ol.layer.Vector({
         title: 'add Layer',
         source: new ol.source.Vector({
             projection: 'EPSG:4326',
@@ -127,7 +118,7 @@ var initLayers = function (){
         })
     })*/
 
-    var mlayers = [osmtile,tiled,provinceAnotation];  //dbVecLayer];  //图层数组
+    var mlayers = [osmtile,tiled,jsonVecLayer,dbVecLayer,provinceAnotation];  //图层数组
     return mlayers;
 }
 
@@ -135,7 +126,7 @@ var initLayers = function (){
 
 var initOlTools = function(mlayers){
     //自适应地图view
-   // map.getView().fit(extent, map.getSize());
+    map.getView().fit(extent, map.getSize());
     //map.getView().setZoom(4);
     //添加比例尺控件
     map.addControl(new ol.control.ScaleLine());
@@ -153,5 +144,44 @@ var initOlTools = function(mlayers){
             }
         })
     );
-
+    var overviewMapControl = new ol.control.OverviewMap({
+        className:'ol-overviewmap ol-custom-overviewmap',  //控制鹰眼图样式
+        //这个控件相当于独立的map了，需要重新添加新图层，设置新view
+        view: new ol.View({
+            projection: 'EPSG:4326',
+            //zoom: 8
+        }),
+        collapseLabel: '\u00BB',            //鹰眼展开时功能按钮上的标识
+        label: '\u00AB',                    //鹰眼控件折叠时功能按钮标识
+        collapsed:false,                     //初始为展开显示方式
+        layers: [
+            new ol.layer.Tile({
+                visible: true,
+                source: new ol.source.OSM({
+                    //maxZoom:4
+                })
+            }),
+            //瓦片图层
+            new ol.layer.Tile({
+                visible: true,
+                source: new ol.source.TileWMS({
+                    url: urlAdr,  //URL
+                    params: {  //请求参数
+                        'LAYERS': layerName,
+                        'TILED': false,  //对TileWMS无影响
+                    },
+                    serverType: 'geoserver'
+                })
+            }),
+        ] //离谱的事情就这么轻易发生，如果使用mlayers.slice(0,2)就会闪烁×××  -----不是这个原因，但这里要注意尽量避免使用其他相同图层
+        // 其实并不是这个原因，我测试之后发现问题出在osm身上，只要重复使用OSM的layer就会闪烁，在主地图和缩略图间交替闪烁。仔细想想，ol.Map和ol.control.OverviewMap应该都是map，而且缩放程度不同，
+        // OSM又是一个综合的数据源，他们不能同时请求同一个缩放程度不同的OSM。当然，这只是我根据官网API文档介绍的推测。
+        //同源的矢量图层ol.layer.Vector和图片图层ol.layer.Image也会受到一定程度的影响，ol.layer.Vector可能会因为缩放而导致显示问题，如果没有缩略图，只会在极小比例尺突然放大到较大比例尺，网络未能及时加载资源的的情况下出现这种情况，但如果缩略图使用了同源矢量图层，导致主图比例尺大时，缩略图仍然处在小比例尺，两幅图显示会出现混乱问题，从而影响主图的观感）
+        //这个问题在平移时尤为明显，不能忍受
+        //而图片图层ol.layer.Image的问题则是直接闪烁，闪烁似乎与OSM的如出一辙，但原因是否一样就不得而知了
+        //当然，如果再生成（new）一些数据源相同（例如相同url的WMS瓦片）的图层作为缩略图的图层，也不会存在上述问题。
+        // 因此，可以总结一下，这个问题（地图闪烁，矢量图显示异常）的核心就是“与相同图层有关，与相同数据源无关”。
+        //对地图瓦片ol.layer.Tile（指ol.source.TileWMS）似乎影响不大，但为了避免以后不必要的问题，这里还是建议不要在缩略图（以及其他map中）使用相同图层
+    });
+    map.addControl(overviewMapControl);  //添加鹰眼图
 }
