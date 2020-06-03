@@ -1,7 +1,7 @@
 //基本底图
 var envstr = '';
 var extent = [73.44696044921875,6.318641185760498,135.08583068847656,53.557926177978516];
-
+var osmtile;
 var urlAdr = 'http://47.94.150.127:8080/geoserver/xjs/wms';   //8080是Tomcat9那个服务器，需要在云端运行tomcat9
 //var layerName = 'xjs:BoundaryChn2_4p,xjs:BoundaryChn2_4l,xjs:BoundaryChn1_4l';
 var layerName = 'xjs:BoundaryChn2_4p,xjs:BoundaryChn2_4l,xjs:BoundaryChn1_4l';
@@ -15,24 +15,40 @@ var initMap = function(){
     //设置地图范围
 
     var mlayers = initLayers();
+
+    var overviewMapControl = new ol.control.OverviewMap({
+        //className:'ol-overviewmap ol-custom-overviewmap',  //控制鹰眼图样式
+        layers:mlayers,
+        view: new ol.View({
+            projection: 'EPSG:4326',
+            center: [115, 39],
+            zoom: 2
+        }),
+    });
+    /*
+    controls: ol.control.defaults({
+        attributionOptions: {
+            collapsible: true
+        }
+    })*/
+
     //定义地图对象//地图对象
     map = new ol.Map({
-
+        controls:ol.control.defaults().extend([overviewMapControl]),
         layers: mlayers,
         target: 'map',
         view: new ol.View({
             projection: 'EPSG:4326',
-            //center: [115, 39],
-            //zoom: 4
+            center: [115, 39],
+            zoom: 4
         }),
-        controls: ol.control.defaults({
-            attributionOptions: {
-                collapsible: true
-            }
-        })
+
 
     });
-    initOlTools(); //初始化工具
+
+
+
+    initOlTools(mlayers); //初始化工具
 
 }
 
@@ -111,15 +127,15 @@ var initLayers = function (){
         })
     })*/
 
-    var mlayers = [osmtile,tiled,jsonVecLayer,dbVecLayer,provinceAnotation];  //dbVecLayer];  //图层数组
+    var mlayers = [osmtile,tiled,provinceAnotation];  //dbVecLayer];  //图层数组
     return mlayers;
 }
 
 
 
-var initOlTools = function(){
+var initOlTools = function(mlayers){
     //自适应地图view
-    map.getView().fit(extent, map.getSize());
+   // map.getView().fit(extent, map.getSize());
     //map.getView().setZoom(4);
     //添加比例尺控件
     map.addControl(new ol.control.ScaleLine());
@@ -137,4 +153,5 @@ var initOlTools = function(){
             }
         })
     );
+
 }

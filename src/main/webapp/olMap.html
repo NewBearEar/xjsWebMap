@@ -17,6 +17,7 @@
     <link rel="stylesheet" href="dist/oldist/openlayers/ol.css" type="text/css">
     <link rel="stylesheet" href="dist/jquery-ui-1.12.1/jquery-ui.css" type="text/css">
     <link rel="stylesheet" href="css/myMapStyle.css" type="text/css">
+    <link rel="stylesheet" href="css/mySearchStyle.css">
     <style>
         /*基于juery ui css
         /*自动补全loading*/
@@ -56,8 +57,8 @@
     <div id="loadgif" style="position:absolute;top:45%;left:45%;z-index: 1">
         　　<img alt="加载中..." src="img/loading2.gif"/>
     </div>
-    <div id="left-panel" class style="height: 850px">
-        <div id = searchBar >
+    <div id="left-panel" class style="display: block;">
+        <div id = searchBar style="pointer-events: auto">
             <form id="formSearch" action="" onsubmit="return false;" >   <!--οnsubmit="return false;"阻止提交,注意写的时候引号里面不能是绿色字符串，必须变色才能识别到里面的js代码-->   <!--action="getGeoJson"     action="/xjs/getGeoJson"   不需要action-->
                 <img src="img/searchimg.png" alt="">
                 <input type="text" id="searchTxt" name="searchTxt" placeholder="输入搜索城市名" onkeydown="if(event.keyCode==13) {$('#btn').click(); $('#searchTxt').autocomplete('close'); }" > <!--回车调用搜索按钮的click事件并关闭autocomplete-->
@@ -90,6 +91,7 @@
             var searchTxtValue = $('#searchTxt').val();   //val()而不是value()
             //console.log(searchTxtValue);
 
+
             $.ajax({  //AJAX向Servlet发送get请求，请求后台数据库数据
                 url: "getGeoJson", // url不带/就是当前路径（因为我这个html放在webapp目录下），而且在页面上访问时已经包含application context，相当于/xjs/getGeoJson
                 dataType: "json",   //传输json
@@ -97,6 +99,8 @@
                 type: "get",
                 success: function (dbGeoJson) {  //回调函数，更新map
                     $("#loadgif").hide();  //隐藏加载动画
+
+                    $("#left-panel").css("height","850px");//left-panel显示
                     //console.log(dbGeoJson);  //这里已经传回一个json对象
                     if($.isEmptyObject(dbGeoJson)){   //判断返回对象是否为空对象
                         alert("未查询到相关内容");
@@ -197,12 +201,14 @@
                 var name = attr.name;
                 var pinyin = attr.pinyin;
                 var intro = attr.intro;
+                var gid = attr.gid;   //要素的唯一标识码
                 if(attr.image == null){
                     var image = "No Image";
                 }else {
                     var image = attr.image;   //暂定，待修改
                 }
-                var showAttributionArray = [dynamicId,name,pinyin,intro,image]; //需要显示信息的数组
+                var showAttributionArray = [dynamicId,name,pinyin,intro,image];
+                showAttributionArray.push(gid); //需要显示信息的数组,gid永远添加在最后，所以push
                 console.log(showAttributionArray);
                 if(i<5){
                     addPoiLine("show-poilist",showAttributionArray,i);
@@ -216,8 +222,15 @@
             }).on('mouseout',function () {
                 $(this).removeClass('show-poiline-mouseover');
             }).on('click',function () {
+                //添加点击事件
                 $('.show-poiline-selected').removeClass('show-poiline-selected');
                 $(this).addClass('show-poiline-selected');
+                //获取搜索参数和值
+                var searchParams = $(this).attr('name').split("-")
+                var searchKey = searchParams[0];
+                var searchValue = searchParams[1];
+                console.log(searchKey+searchValue);
+                window.location = 'jsp/showInfo.jsp?'+searchKey +'='+searchValue;  //跳转页面
             })
 
             if(featureArray.length>5){
@@ -231,7 +244,8 @@
         var addPoiLine = function(parentNodeId,showAttributionArray,rowIndex){
             //需要参数：待添加节点的id，需要显示信息的数组,行号
             $("#"+parentNodeId).append("<li id=poi-line-"+rowIndex+"></li>");
-            $("#poi-line-"+rowIndex).attr("class","poi-linebox");
+           console.log(showAttributionArray.slice(-1)) ;
+            $("#poi-line-"+rowIndex).attr("class","poi-linebox").attr("name","gid-"+showAttributionArray.slice(-1));    //slice取值 赋值gid(最后一个)给name
 
             //添加li下面的各种div
             //添加图片结构

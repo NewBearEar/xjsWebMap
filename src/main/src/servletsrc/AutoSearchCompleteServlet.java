@@ -44,7 +44,7 @@ public class AutoSearchCompleteServlet extends HttpServlet {
         String sqlBase = "select gid,name,pinyin "+
                 "from all_city_county ";
         String sql = "";
-        if(!"".equals(searchTxt) || searchTxt!=null) {   //判断查询参数是否为空，利用“”字符串常量调用equals方法，避免searchTxt为null调用equals抛出异常，equals会处理参数为null的情况
+        if((!("".equals(searchTxt)))|| searchTxt != null) {   //判断查询参数是否为空，利用“”字符串常量调用equals方法，避免searchTxt为null调用equals抛出异常，equals会处理参数为null的情况
             //这里不能使用逻辑运算符==或！=比较，因为只比较了引用是否相等，注意String Pool
             sql = sqlBase + "where name like " + "\'" + searchTxt + "%\'";    //先支持城市名称的模糊查询试试  //模糊查询只匹配后面的
             System.out.println(sql);   //看看sql语句
