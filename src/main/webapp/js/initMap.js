@@ -28,7 +28,8 @@ var initMap = function(){
     map = new ol.Map({
         controls:ol.control.defaults({
             //删除右下角商标栏
-            attribution:false
+            attribution:false,
+            rotate:false
         }),
         layers: mlayers,
         target: 'map',
@@ -133,12 +134,13 @@ var initOlTools = function(mlayers){
     //添加缩放滑动控件
     map.addControl(new ol.control.ZoomSlider());
     //添加全屏控件
-    map.addControl(new ol.control.FullScreen());
+    //map.addControl(new ol.control.FullScreen());
     //添加鼠标定位控件
     map.addControl(new ol.control.MousePosition({
+            className: "ol-mouse-position ol-custom-mouse-position",    //为了更改样式，必须在默认类名基础上增加一个
             undefinedHTML: 'outside',
             projection: 'EPSG:4326',
-            target:$("#location")[0],
+            //target:$("#wrapper-loc")[0],
             coordinateFormat: function(coordinate) {
                 return ol.coordinate.format(coordinate, '{x}, {y}', 4);
             }

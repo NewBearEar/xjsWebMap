@@ -23,9 +23,11 @@ public class PostgreUtil extends DatabaseUtil { //postgis连接工具类
         ArrayList<String> jsonStringList = parseResult2String(queryResult);
         System.out.println(jsonStringList.get(0));
         closeDbConn(testConn);*/
-
+        System.out.println(System.currentTimeMillis());
         //试试上传图片
-        String url = "jdbc:postgresql://47.94.150.127:5432/chn_test";
+        String urlBase = "jdbc:postgresql://47.94.150.127:5432/";
+        String dbName = "chn_test";
+        String url = urlBase + dbName;
         String user = "postgres";
         String passwd = "xiong123";
         Connection testConn = getDbConn(url,user,passwd);
@@ -125,9 +127,11 @@ public class PostgreUtil extends DatabaseUtil { //postgis连接工具类
         }
     }
 
-    public static String getPropertyArrayStr(Connection connection,String searchKey,String searchValue) throws SQLException {
+
+
+    public static String getPropertyArrayStr(Connection connection,String tableName,String searchKey,String searchValue) throws SQLException {
         //精准查询返回所有属性，包括类型和坐标
-        String tableName = "all_city_county";
+
         //查询基础语句
         String sqlBase = "select json_agg(ST_AsGeoJSON(t.*)::json)\n" +
                 "from "+tableName+" as t ";
@@ -174,8 +178,13 @@ public class PostgreUtil extends DatabaseUtil { //postgis连接工具类
         return  attrArrayStr;
 
     }
+    public static String getPropertyArrayStr(Connection connection,String searchKey,String searchNameValue) throws SQLException {
+        //重载，数据表String tableName = "all_city_county"来查询
+        String tableName = "all_city_county";
+        return getPropertyArrayStr(connection,tableName,searchKey,searchNameValue);
+    }
     public static String getPropertyArrayStr(Connection connection,String searchNameValue) throws SQLException {
-        //重载，只能按照字段名等于 name 的来查询
+        //重载，只能按照字段名等于 name ,数据表String tableName = "all_city_county"的来查询
         String keyEqualsName = "name";
         return getPropertyArrayStr(connection,keyEqualsName,searchNameValue);
     }

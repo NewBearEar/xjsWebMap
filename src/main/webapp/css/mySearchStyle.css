@@ -207,7 +207,7 @@ h3 {
     overflow: hidden;
     font-family: Tahoma;
 }
-p {
+.poi-introduction {
     display: block;
     margin-block-start: 1em;
     margin-block-end: 1em;

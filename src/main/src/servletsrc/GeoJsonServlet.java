@@ -24,6 +24,7 @@ public class GeoJsonServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         //连接数据库，获取json
         //尝试连接
+
         String url = "jdbc:postgresql://47.94.150.127:5432/chn_test";
         String user = "postgres";
         String passwd = "xiong123";
