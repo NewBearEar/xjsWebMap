@@ -12,6 +12,7 @@
     <script type="text/javascript" src="../dist/jquery/jquery-3.5.1.js"></script>
     <script type="text/javascript" src="../dist/jquery-ui-1.12.1/jquery-ui.js"></script>
     <link rel="stylesheet" href="../dist/jquery-ui-1.12.1/jquery-ui.css" type="text/css">
+    <!--
     <title>updateInfo</title>
     <style>
         body
@@ -47,15 +48,20 @@
             margin: 20px;
         }
     </style>
+    -->
 </head>
 <body>
-
+<!--
 <div id="box1" class="box blurred-bg tinted" style="display:none;overflow:hidden;padding:3px" >
 
     <iframe src="showInfo.jsp" frameborder="no" border="0" marginwidth="0" marginheight="0" id="prodcutDetailSrc"  scrolling="0"  width="100%" height="100%"
 
     ></iframe>
 </div>
+-->
+<%
+    response.getWriter().println("{}");
+%>
 
 <script type="text/javascript">
     $(function() {

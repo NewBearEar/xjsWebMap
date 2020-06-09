@@ -156,7 +156,7 @@ var addShowCardAndPoiList = function (dbGeoJson) {
     }
 
 }
-var addPoiLine = function(parentNodeId,showAttributionArray,rowIndex){
+function addPoiLine(parentNodeId,showAttributionArray,rowIndex){
     //需要参数：待添加节点的id，需要显示信息的数组,行号
     $("#"+parentNodeId).append("<li id=poi-line-"+rowIndex+"></li>");
     console.log(showAttributionArray.slice(-1)) ;
@@ -165,7 +165,11 @@ var addPoiLine = function(parentNodeId,showAttributionArray,rowIndex){
     //添加li下面的各种div
     //添加图片结构
     $("#poi-line-"+rowIndex).append("<div id=poi-imgbox-"+ rowIndex+" class='poi-imgbox'></div>");
-    $("#poi-imgbox-"+rowIndex).append("<span id=poi-img-"+rowIndex +" class='poi-img'>暂无图片</span>"); //试试
+    //$("#poi-imgbox-"+rowIndex).append("<span id=poi-img-"+rowIndex +" class='poi-img'></span>"); //试试
+
+    //注意这里给了一个相对路径，其中含有xjs的虚拟路径
+    $("#poi-imgbox-"+rowIndex).append("<img id=poi-img-"+rowIndex +" class='poi-img' src='../xjs/imageOut?gid="+showAttributionArray.slice(-1)+"' alt='暂无图片'>"); //试试=\"../img/defaultImg.jpg\"
+    //$(#"poi-img-"+rowIndex).append("<img src=\"../img/defaultImg.jpg\">");    // 这个通过gid进行图片查询
     //$("#poi-img-"+rowIndex).attr("style","")
     //添加info结构
     $("#poi-line-"+rowIndex).append("<div id=poi-info-left-"+ rowIndex+" class='poi-info-left'></div>"); //加上box

@@ -133,7 +133,7 @@ div{
     margin: 0 8px;
     overflow: hidden;
 }
-/*
+ /*设置图片显示大小*/
 .poi-linebox .poi-img {
     display: inline-block;
     width: 100%;
@@ -141,7 +141,7 @@ div{
     background-size: cover;
     background-position: 50%;
 }
- */
+
 ul {
     display: block;
     list-style-type: disc;

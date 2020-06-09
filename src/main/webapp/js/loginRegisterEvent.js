@@ -158,6 +158,9 @@ function showLoginedInfo(){
     $("#message-center").addClass("message-center-show");
     $("#user_name").val("");
     $("#password").val("");
+    //显示头像
+    $(".avatar-abstract").css("background-image","url('headImage')");
+
 }
 function hideLoginedInfo(){
     //登出后消除界面变化
@@ -165,6 +168,7 @@ function hideLoginedInfo(){
     $("#message-center").addClass("message-center-hidden");
     $("#user_name").val("");
     $("#password").val("");
+    $(".avatar-abstract").css("background-image","url('img/noneLogin.jpg')");
 }
 
 function switchLoginoutWrapper(isLogined) {

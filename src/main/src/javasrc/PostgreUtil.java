@@ -1,5 +1,6 @@
 package javasrc;
 
+import jdk.internal.util.xml.impl.Input;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -26,23 +27,27 @@ public class PostgreUtil extends DatabaseUtil { //postgis连接工具类
         System.out.println(System.currentTimeMillis());
         //试试上传图片
         String urlBase = "jdbc:postgresql://47.94.150.127:5432/";
-        String dbName = "chn_test";
+        String dbName = "user_info";
         String url = urlBase + dbName;
         String user = "postgres";
         String passwd = "xiong123";
         Connection testConn = getDbConn(url,user,passwd);
-        String sql = "insert into all_city_county(image_name,image) values(?,?)";
+        //String sql = "insert into all_city_county(image_name,image) values(?,?) where gid=2999";   //insert into 是全部插入记录，不能用where
+        //String sql = "update all_city_county set image_name=?,image=?";
+        String sql = "insert into headimg_table(image_name,image) values (?,?)";
         PreparedStatement ps = null;
 
         try {
             ps = testConn.prepareStatement(sql);
 
             // 设置图片名称
-            ps.setString(1, "defaultImage");
+            //ps.setString(1, "defaultImage");
 
             // 设置图片文件
-            File file = new File("D:\\xWebMap/src/main/webapp/img/defaultImg.jpg");
+            String filePath = "D:"+ File.separator + "xWebMap/src/main//webapp/img/defaultHeadimg.jpg";
+            File file = new File(filePath);
             FileInputStream inputStream = new FileInputStream(file);
+            ps.setString(1,"noneLogin");
             ps.setBinaryStream(2, inputStream, (int) file.length());
 
             // 执行SQL
@@ -121,7 +126,8 @@ public class PostgreUtil extends DatabaseUtil { //postgis连接工具类
 
     public static void closeDbConn(Connection conn){
         try {
-            conn.close();
+            if (conn!=null)
+                conn.close();
         }catch (Exception e){
             e.printStackTrace();
         }
@@ -165,10 +171,17 @@ public class PostgreUtil extends DatabaseUtil { //postgis连接工具类
         JSONObject jsonObject = null;
         JSONObject attrObject = null;
         JSONArray attrArray = new JSONArray();
-        for(int i = 0;i<jsonArray.length();i++){
+        for(int i = 0;i<jsonArray.length();i++){   //对于每一行
             jsonObject = jsonArray.getJSONObject(i);
             JSONObject srcObj = jsonObject.getJSONObject("properties");
-            JSONObject addObj = jsonObject.getJSONObject("geometry");
+            JSONObject geomObj = jsonObject.getJSONObject("geometry");
+            //将坐标分离为xy
+            JSONArray coorArray = geomObj.getJSONArray("coordinates");
+            JSONObject addObj = new JSONObject();
+            addObj.put("type",geomObj.getString("type"));
+            addObj.put("longitude",coorArray.getDouble(0));
+            addObj.put("latitude",coorArray.getDouble(1));
+
             //合并geometry和properties作为输出的属性
             attrObject = JsonUtil.combineJsonObj(srcObj,addObj);
             attrArray.put(attrObject); //添加到输出attr数组
@@ -187,6 +200,26 @@ public class PostgreUtil extends DatabaseUtil { //postgis连接工具类
         //重载，只能按照字段名等于 name ,数据表String tableName = "all_city_county"的来查询
         String keyEqualsName = "name";
         return getPropertyArrayStr(connection,keyEqualsName,searchNameValue);
+    }
+
+    //重载，对一般的表
+    public static InputStream queryImgStream(Connection conn, int imgId, String tableStr) throws SQLException, FileNotFoundException {
+        String sql = "select image from "+tableStr+" where img_id=?";
+        PreparedStatement ppStatement = conn.prepareStatement(sql);
+        ppStatement = conn.prepareStatement(sql);
+        ppStatement.setInt(1,imgId);
+        ResultSet resultSet = ppStatement.executeQuery();
+        InputStream inputStream = null;
+        while(resultSet.next()){
+            inputStream = resultSet.getBinaryStream("image");
+        }
+        System.out.println(" 已查询");
+        return inputStream;
+    }
+    //根据id，查询图片字节流
+    public static InputStream queryImgStream(Connection conn, int imgId) throws SQLException, FileNotFoundException {
+        String tableStr = "image_table";   //对于gid图片
+        return queryImgStream(conn,imgId,tableStr);
     }
 }
 
