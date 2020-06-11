@@ -100,15 +100,16 @@ function loginAjax(paramObj) {
                 $("#login_form,.tenant-model-header").removeClass('shake_effect');
                 setTimeout(function()
                 {
-                    $("#login_form,.tenant-model-header").addClass('shake_effect')
+                    $("#login_form,.tenant-model-header").addClass('shake_effect');
                 },1);
             }else if(userProfile.statusCode == 1) {
                 //alert("登录成功！");
-                window.sessionStorage.setItem('username',paramObj.username);
-                window.sessionStorage.setItem('password',paramObj.password);
+                //window.sessionStorage.setItem('username',paramObj.username);
+                //window.sessionStorage.setItem('password',paramObj.password);
+                //console.log(userProfile);
                 isLogined = true;
                 switchLoginoutWrapper(isLogined);
-                showLoginedInfo();
+                showLoginedInfo(userProfile);
                 closeModalBox();  //关闭登录框
             }else {
                 $("#login_form,.tenant-model-header").removeClass('shake_effect');
@@ -152,10 +153,17 @@ function logoutAjax() { //
     });
 }
 
-function showLoginedInfo(){
+function showLoginedInfo(userProfile){
+    //登录之后显示nickname
+    $("#welcom-nickname").text(userProfile.nickname);
+
     //显示所有登录后的界面变化
-    $("#message-center").removeClass("message-center-hidden");
-    $("#message-center").addClass("message-center-show");
+    $("#message-center").removeClass("center-hidden");
+    $("#message-center").addClass("center-show");
+    //显示工具栏
+    $("#tool-center").removeClass("center-hidden")
+    $("#tool-center").addClass("center-show");
+
     $("#user_name").val("");
     $("#password").val("");
     //显示头像
@@ -164,8 +172,12 @@ function showLoginedInfo(){
 }
 function hideLoginedInfo(){
     //登出后消除界面变化
-    $("#message-center").removeClass("message-center-show");
-    $("#message-center").addClass("message-center-hidden");
+    $("#message-center").removeClass("center-show");
+    $("#message-center").addClass("center-hidden");
+    //移除工具栏
+    $("#tool-center").removeClass("center-show")
+    $("#tool-center").addClass("center-hidden");
+
     $("#user_name").val("");
     $("#password").val("");
     $(".avatar-abstract").css("background-image","url('img/noneLogin.jpg')");

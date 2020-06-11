@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script src="../dist/echarts_dist/echarts.js"></script>
+    <script src="../dist/jquery/jquery-3.5.1.js"></script>
+    <title>Title</title>
+</head>
+<body>
+    <!-- 为 ECharts 准备一个具备大小（宽高）的 DOM -->
+    <div id="adcode-histogram" style="width: 600px;height:400px;"></div>
+</body>
+<script type="text/javascript">
+    var adcodeHistogram = new echarts.init($("#adcode-histogram")[0]);
+    $(function () {
+        adcodeHistogram.setOption({
+            title: {
+                text: 'Adcode Histogram',
+                textStyle: {
+                    fontSize: '25',
+                    //fontWeight: 'bold'
+                },
+                left:"center"
+            },
+            toolbox: {
+                feature: {
+                    dataView: {show: true, readOnly: false},
+                    //magicType: {show: true, type: ['line', 'bar']},
+                    restore: {show: true},
+                    saveAsImage: {show: true}
+                }
+            },
+            xAxis: {
+                data: ["第1级","第2级","第3级","第4级","第5级","第6级","第7级"],
+            },
+            yAxis:{},
+            legend: {
+                orient: 'vertical',
+                left: 'left',
+                data: ["Adcode Counts"],
+                textStyle: {
+                    fontSize: '12',
+                    //fontWeight: 'bold'
+                },
+            },
+            series : [{
+                center:["50%","50%"],
+                name: 'Adcode Counts',
+                type: 'bar',
+                data: [21,10,5,34,56,12,30],
+                itemStyle: {
+                    normal: {
+                        label: {
+                            show: true, //开启显示
+                            position: 'top', //在上方显示
+                            textStyle: { //数值样式
+                                color: 'black',
+                                fontSize: 16
+                            }
+                        }
+                    }
+                },
+            }],
+            textStyle: {
+                fontSize: '15',
+                //fontWeight: 'bold'
+            }
+        });
+
+        //异步加载数据
+        adcodeHistogram.showLoading();  //echarts的loading动画
+        $.ajax({  //AJAX向Servlet发送get请求，请求后台数据库数据
+            url: "../getAdcodeHistData", // url不带/就是当前路径（因为我这个html放在webapp目录下），而且在页面上访问时已经包含application context，相当于/xjs/getGeoJson
+            dataType: "json",
+            type: "post",
+            success: function (adcodeHistData) {  //回调函数，更新map
+                adcodeHistogram.hideLoading();
+                console.log(adcodeHistData);
+                if($.isEmptyObject(adcodeHistData)) {   //判断返回对象是否为空对象
+                    alert("获取数据失败，请重试！");
+                }else {
+                    adcodeHistogram.setOption({
+                        xAxis:{
+                            data: adcodeHistData.name
+                        },
+                        series:[{
+                            //根据name寻找对应的序列
+                            name:'Adcode Counts',
+                            data: adcodeHistData.count
+                        }]
+                    })
+                }
+
+            },
+            error: function () {  //请求失败的回调方法
+                adcodeHistogram.hideLoading();
+                alert("请求失败，请重试");
+            }
+        });
+    })
+
+
+
+
+</script>
+</html>

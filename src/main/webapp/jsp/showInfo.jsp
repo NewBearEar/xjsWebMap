@@ -82,7 +82,7 @@
                 <%
                     }
                 %>
-                <td><p>选择需要上传的图片</p></td>
+                <!--<td><p>选择需要上传的图片</p></td>-->
                 <td>删除</td>
                 <td>更新</td>
             </tr>
@@ -114,14 +114,16 @@
                         }
                     }
                 %>
+                <!--
                 <td>
-                    <form id="img-form">
-                        <input id="subImgFile" type="file" name="image">
+                    <form id="img-form" enctype="multipart/form-data">
+                        <input id="subImgFile" type="file" name="image" formenctype="multipart/form-data">
                         <input id="subImgBtn" type="button" name="subImg" value="上传图片" onclick="uploadImg()">
                     </form>
                 </td>
+                -->
                 <td>
-                    <button><a href="delete.jsp?gid=<%=gid%>">删除该记录</a></button>
+                    <button onclick="deleteInfo()">删除该记录</button>
                 </td>
                 <td>
                     <button onclick="update()">更新该记录</button>    <!--a href="updateInfo.jsp?gid=<%=gid%>,intro=<%=propertyObj.optString("intro")%>,>"-->
@@ -131,13 +133,23 @@
                 }
 
             %>
+            <!--
             <tr>
                 <td>
                     <button><a href="insert.jsp">插入新纪录</a></button>
                 </td>
             </tr>
+            -->
         </table>
     </form>
+
+    <div>
+        <span><p>请上传你的图片</p></span>
+        <form id="img-form" enctype="multipart/form-data" >
+            <input id="subImgFile" type="file" name="image" formenctype="multipart/form-data">
+            <input id="subImgBtn" type="button" name="subImg" value="上传图片" onclick="uploadImg()">
+        </form>
+    </div>   <!--目前已知，submit之后ServletFileUpload.isMultipartContent(request)为真，ajax有点问题？-->
 <%
     PostgreUtil.closeDbConn(conn);
 
@@ -145,13 +157,67 @@
 
 <script type="text/javascript">
     $(".td-editable").attr("contentEditable", true);   //为所有editable的类设置可编辑
+
+    function deleteInfo(){
+        var message = confirm("确定要删除这条记录吗？");  //确认框是否删除
+        if(true == message){
+            var fieldNames = document.getElementById('myTable').rows[0].cells;  //获取一行htmlcolletion
+            var values = document.getElementById('myTable').rows[1].cells;  //获取一行htmlcolletion
+            //console.log(fieldNames);  //
+            //console.log(values);
+            var submitKeyValue = {};
+            for (var i=0;i<fieldNames.length-2;i++){    //这里减2为了排除删除更新按钮
+                var fieldName = fieldNames[i].innerHTML.replace(/^\s*|\s*$/g, '');   //一列的内容
+                //console.log(fieldName);
+                var value = values[i].innerHTML.replace(/^\s*|\s*$/g, '');
+                submitKeyValue[fieldName] = value;  //添加对象   为啥这个里创建出来就是json格式的js对象呢？ajax需要去掉key的双引号
+            }
+            console.log(submitKeyValue);
+            //console.log(JSON.stringify(submitKeyValue));
+            //console.log({'name':"123"});
+
+            //ajax删除数据
+            $("#loadgif").show();
+            $.ajax({  //AJAX向Servlet发送get请求，请求后台数据库数据
+                url: "../deleteInfo", // url不带/就是当前路径（因为我这个html放在webapp目录下），而且在页面上访问时已经包含application context，相当于/xjs/getGeoJson
+                dataType: "json",   //传输对于jsp页面，只能要求text数据？ 若写json，则即使是200请求成功，也会调用error
+                data: submitKeyValue,  //不能是json格式的对象，而必须是非json格式的对象，否则后端无法直接从名字读取
+                type: "post",
+                success: function (deleteStatus) {  //回调函数，更新map
+                    $("#loadgif").hide();
+                    console.log(deleteStatus);
+                    if($.isEmptyObject(deleteStatus)) {   //判断返回对象是否为空对象
+                        alert("删除失败！");
+                    }else {
+                        if(1==deleteStatus.statusCode){
+                            alert("删除成功！");
+                            location.reload();
+                        }else {
+                            alert("删除失败！");
+                        }
+                    }
+
+                },
+                error: function () {  //请求失败的回调方法
+                    $("#loadgif").hide();
+                    alert("请求失败，请重试");
+                }
+            });
+
+
+        }else {
+
+        }
+    }
+
+
     function update() {
         var fieldNames = document.getElementById('myTable').rows[0].cells;  //获取一行htmlcolletion
         var values = document.getElementById('myTable').rows[1].cells;  //获取一行htmlcolletion
         //console.log(fieldNames);  //
         //console.log(values);
         var submitKeyValue = {};
-        for (var i=0;i<fieldNames.length-3;i++){
+        for (var i=0;i<fieldNames.length-2;i++){    //这里减2为了排除删除更新按钮
             var fieldName = fieldNames[i].innerHTML;   //一列的内容
             //console.log(fieldName);
             var value = values[i].innerHTML;
@@ -210,8 +276,8 @@
         var jsonObjNodquo = eval('('+jsonStr+')');  //key无双引号的js对象  JSON.parse只能处理严格的JSON格式，而eval更宽泛
         return jsonObjNodquo;
     }
+
     function uploadImg() {
-        alert("fuck");
 
         var fieldNames = document.getElementById('myTable').rows[0].cells;  //获取一行htmlcolletion
         var values = document.getElementById('myTable').rows[1].cells;  //获取一行htmlcolletion
@@ -223,7 +289,7 @@
         var imgval = $("#subImgFile").val();
         var imgfile = $("#subImgFile")[0].files[0];  //获取file
         if(""==imgval || null==imgfile){
-            alert("请先选择上传的图片")
+            alert("请先选择上传的图片");
             return;
         }
 
@@ -231,39 +297,42 @@
         //var form=document.querySelector("#img-form");
         //将获得的表单元素作为参数，对formData进行初始化
         //console.log(form);
-        var subData = new FormData();   //根据表单创建对象
-        subData.append(imgkey,imgfile); //向表单对象添加内容
+        var subData = new FormData($("#img-form")[0]);   //根据表单创建对象
+        //var subData = new FormData();
+        //subData.append(imgkey,imgfile); //向表单对象添加内容
+        console.log(subData.get("image"));
 
-        for (var i=0;i<fieldNames.length-3;i++){
+        for (var i=0;i<fieldNames.length-2;i++){
             var fieldName = fieldNames[i].innerHTML.replace(/^\s*|\s*$/g, '');   //一列的内容  去除两头空格  innerHTML会多出一个空格？
             //console.log(fieldName);
             var value = values[i].innerHTML.replace(/^\s*|\s*$/g, '');
             //console.log(fieldName);
             //console.log(value);
-            if("image_name"==fieldName){
+            if("image_name"==fieldName || "gid"==fieldName){
                 submitKeyValue[fieldName] = value;  //只添加图片名
-                subData.append("image_name",value);  //向表单对象添加图片名
+                subData.append(fieldName,value);  //向表单对象添加图片名
             }
         }
         submitKeyValue[imgkey] = imgval;
-        console.log(subData.get("image_name"));
+        console.log(subData.get("gid"));
+        //console.log(subData.keys());
 
         $("#loadgif").show();
         //ajax上传图片
         $.ajax({  //AJAX向Servlet发送get请求，请求后台数据库数据
             url: "../uploadImg", // url不带/就是当前路径（因为我这个html放在webapp目录下），而且在页面上访问时已经包含application context，相当于/xjs/getGeoJson
-            dataType: "json",   //传输对于jsp页面，只能要求text数据？ 若写json，则即使是200请求成功，也会调用error
-            data: submitKeyValue,  //不能是json格式的对象，而必须是非json格式的对象，否则后端无法直接从名字读取
+            dataType: "json",   //传输对于jsp页面，只能要求text数据？ 若写json，则即使是200请求成功，也会调用error   //并不是，而是因为请求json就必须满足json格式（全部字符双引号，数字无引号）
+            data: subData,  //必须是FormData 保证ServletFileUpload.isMultipartContent(request)为true
             type: "post",
             processData:false,//*必须
             contentType:false,//*必须
-            success: function (updateStatus) {  //回调函数，更新map
+            success: function (uploadImgStatus) {  //回调函数，更新map
                 $("#loadgif").hide();
-                console.log(updateStatus);
-                if($.isEmptyObject(updateStatus)) {   //判断返回对象是否为空对象
+                console.log(uploadImgStatus);
+                if($.isEmptyObject(uploadImgStatus)) {   //判断返回对象是否为空对象
                     alert("更新失败！");
                 }else {
-                    if(1==updateStatus.statusCode){
+                    if(1==uploadImgStatus.statusCode){
                         alert("更新成功！");
                     }else {
                         alert("更新失败！");

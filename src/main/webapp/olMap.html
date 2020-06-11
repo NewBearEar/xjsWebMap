@@ -19,6 +19,7 @@
     <link rel="stylesheet" href="css/myMapStyle.css" type="text/css">
     <link rel="stylesheet" href="css/mySearchStyle.css">
     <link rel="stylesheet" href="css/loginStyle.css">
+    <link rel="stylesheet" href="css/histogramWidgetStyle.css">
     <style>
         /*基于juery ui css
         /*自动补全loading*/
@@ -44,6 +45,15 @@
             color: #000000;  /*字体颜色黑色不变*/
 
         }
+
+        /**工具栏**/
+        #dialog-form label, input { display:block; }
+        #dialog-form input.text { margin-bottom:12px; width:95%; padding: .4em; }
+        #dialog-form fieldset { padding:0; border:0; margin-top:25px; }
+        h1 { font-size: 1.2em; margin: .6em 0; }
+        .ui-dialog .ui-state-error { padding: .3em; }
+        .validateTips { border: 1px solid transparent; padding: 0.3em; }
+
 
 
     </style>
@@ -76,11 +86,15 @@
         <div id="user-center" class="ui3-user-center-wrap">
             <div class="avatar-abstract" style="background-image: url('img/noneLogin.jpg');"></div>
         </div>
-        <div id="message-center" class="message-center-hidden">
+        <div id="message-center" class="center-hidden">
             <div class="message-center-entrance"></div>
             <div id="message-panel">
-                <p class="welcom-message">欢迎登录 <a href="#" id="welcom-nickname">wdnmd</a></p>
+                <p class="welcom-message">欢迎登录 <a href="#" id="welcom-nickname"></a></p>
             </div>
+        </div>
+        <div id="tool-center" class="center-hidden">
+            <input type="button" id="add-click-tool" value="添加记录" style="padding: .2em 1em">
+            <input type="button" id="open-adcode-histogram" value="打开统计图" class="ui-button ui-corner-all ui-widget" style="padding: .2em 1em">
         </div>
     </div>
 
@@ -123,11 +137,46 @@
 
     </div>
 
+    <div id="dialog-form" title="创建新纪录">
+        <p class="validateTips">所有的表单字段都是必填的。</p>
+
+        <form id="add-info">
+            <fieldset>
+                <label for="name">城市中文名</label>
+                <input type="text" name="name" id="name" class="text ui-widget-content ui-corner-all">
+                <label for="pinyin">城市拼音</label>
+                <input type="text" name="pinyin" id="pinyin" class="text ui-widget-content ui-corner-all">
+                <label for="intro">简介</label>
+                <input type="text" name="intro" id="intro" value="" class="text ui-widget-content ui-corner-all">
+                <label for="adcode93">adcode93</label>
+                <input type="text" name="adcode93" id="adcode93" value="" class="text ui-widget-content ui-corner-all">
+                <label for="longitude">经度</label>
+                <input type="text" name="longitude" id="longitude" value="" class="text ui-widget-content ui-corner-all" placeholder="点击地图获取经度">
+                <label for="latitude">纬度</label>
+                <input type="text" name="latitude" id="latitude" value="" class="text ui-widget-content ui-corner-all" placeholder="点击地图获取纬度">
+                <label for="type">几何类型</label>
+                <input type="text" name="type" id="type" value="Point" class="text ui-widget-content ui-corner-all" readonly="readonly">
+            </fieldset>
+        </form>
+    </div>
+
+    <div id="histogram-wrapper" class="histogram-page blurred-bg tinted shaded " style="display: none" >
+        <header id="histogram-header" class="tenant-model-header">
+            <h4 style="margin-left: 20px;padding:5px;font-weight: bold;height: 25px;line-height: 30px;font-size: 15px;color: #b3b3b3;">Adcode Histogram</h4>
+            <span id="close-histogram" class="closeModel">×</span>
+        </header>
+        <div id="inner-histogram">
+            <iframe src="html/adcodeHistogram.html" frameborder="no" border="0" marginwidth="0" marginheight="0" id="prodcutDetailSrc"  scrolling="0"  width="100%" height="100%"></iframe>
+        </div>
+    </div>
+
+
     <div id="map" class="map" ></div>
     <div id="wrapper-loc"></div>
     <script type="text/javascript" src="js/search.js"></script>
     <script type="text/javascript" src="js/initMap.js"></script>
     <script type="text/javascript" src="js/loginRegisterEvent.js"></script>
+    <script type="text/javascript" src="js/mapTool.js"></script>
     <script type="text/javascript">
         //window.onload = checkIfLogined;
         //判断是否登录的flag，但是否可以用cookie来实现？
@@ -138,8 +187,19 @@
             initMap();
             loginRegisterAddEvents();
             checkIfLogined();
+            addClickDialogEvent();
+            mapClickRegist();
+            //addHistogramBoxEvents();
+            $("#open-adcode-histogram").click(function () {
+                $("#histogram-wrapper").show();
+            })
+            $("#close-histogram").click(function () {
+                $("#histogram-wrapper").hide();
+            });
         })
 
+        //$("#open-adcode-histogram").click(openHistogramBox());
+        //$("#close-histogram").click(closeHistogramBox());
         function checkIfLogined() {
             //检查login servlet session是否保存有相关登录信息
             $.ajax({
@@ -152,7 +212,7 @@
                         //alert("登录成功！");
                         isLogined = true;
                         switchLoginoutWrapper(isLogined)
-                        showLoginedInfo();
+                        showLoginedInfo(userProfile);
                     }
                 },
                 error: function () {  //请求失败的回调方法
@@ -162,6 +222,17 @@
             })
         }
 
+        function closeHistogramBox() {  //关闭统计图
+
+            $("#inner-histogram").empty();  //清空统计图
+            $("#histogram-wrapper").hide();
+        }
+        function openHistogramBox() {  //打开统计图
+            $("#histogram-wrapper").show();
+            //添加内嵌统计图
+            $("#inner-histogram").append("<iframe src=\"html/adcodeHistogram.html\" frameborder=\"no\" border=\"0\" marginwidth=\"0\" marginheight=\"0\" id=\"prodcutDetailSrc\"  scrolling=\"0\"  width=\"100%\" height=\"100%\"></iframe>");
+
+        }
 
 
 

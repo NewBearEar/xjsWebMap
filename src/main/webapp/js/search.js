@@ -137,15 +137,19 @@ var addShowCardAndPoiList = function (dbGeoJson) {
     }).on('mouseout',function () {
         $(this).removeClass('show-poiline-mouseover');
     }).on('click',function () {
-        //添加点击事件
-        $('.show-poiline-selected').removeClass('show-poiline-selected');
-        $(this).addClass('show-poiline-selected');
-        //获取搜索参数和值
-        var searchParams = $(this).attr('name').split("-")
-        var searchKey = searchParams[0];
-        var searchValue = searchParams[1];
-        console.log(searchKey+searchValue);
-        window.location = 'jsp/showInfo.jsp?'+searchKey +'='+searchValue;  //跳转页面
+        if(isLogined) {   //管理登录权限
+            //添加点击事件
+            $('.show-poiline-selected').removeClass('show-poiline-selected');
+            $(this).addClass('show-poiline-selected');
+            //获取搜索参数和值
+            var searchParams = $(this).attr('name').split("-")
+            var searchKey = searchParams[0];
+            var searchValue = searchParams[1];
+            console.log(searchKey + searchValue);
+            window.location = 'jsp/showInfo.jsp?' + searchKey + '=' + searchValue;  //跳转页面
+        }else {
+            alert("请先登录再进行编辑")
+        }
     })
 
     if(featureArray.length>5){
