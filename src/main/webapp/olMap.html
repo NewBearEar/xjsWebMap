@@ -11,6 +11,7 @@
     <script type="text/javascript" src="dist/jquery/jquery-3.5.1.js"></script>
     <script type="text/javascript" src="dist/jquery-ui-1.12.1/jquery-ui.js"></script>
 
+
     <!--js放在css文件前，防止css样式被js刷掉-->
     <!--链接式导入css-->
     <link rel="stylesheet" href="dist/oldist/openlayers/ol.css" type="text/css">
@@ -19,7 +20,7 @@
     <link rel="stylesheet" href="css/myMapStyle.css" type="text/css">
     <link rel="stylesheet" href="css/mySearchStyle.css">
     <link rel="stylesheet" href="css/loginStyle.css">
-    <link rel="stylesheet" href="css/histogramWidgetStyle.css">
+    <link rel="stylesheet" href="css/statisticWidgetStyle.css">
     <style>
         /*基于juery ui css
         /*自动补全loading*/
@@ -165,9 +166,17 @@
             <h4 style="margin-left: 20px;padding:5px;font-weight: bold;height: 25px;line-height: 30px;font-size: 15px;color: #b3b3b3;">Adcode Histogram</h4>
             <span id="close-histogram" class="closeModel">×</span>
         </header>
-        <div id="inner-histogram">
-            <iframe src="html/adcodeHistogram.html" frameborder="no" border="0" marginwidth="0" marginheight="0" id="prodcutDetailSrc"  scrolling="0"  width="100%" height="100%"></iframe>
+        <ul class="cd-switcher">
+            <li><a href="#0">分区统计柱状图</a></li>
+            <li><a href="#0">城市等级饼状图</a></li>
+        </ul>
+        <div id="inner-histogram" class="show-statistic">
+
         </div>
+        <div id="inner-pie" class="hide-statistic">
+
+        </div>
+
     </div>
 
 
@@ -177,6 +186,9 @@
     <script type="text/javascript" src="js/initMap.js"></script>
     <script type="text/javascript" src="js/loginRegisterEvent.js"></script>
     <script type="text/javascript" src="js/mapTool.js"></script>
+    <script type="text/javascript" src="js/statisticWidgetInit.js"></script>
+    <script type="text/javascript" src="js/heatmap.js"></script>
+
     <script type="text/javascript">
         //window.onload = checkIfLogined;
         //判断是否登录的flag，但是否可以用cookie来实现？
@@ -190,12 +202,11 @@
             addClickDialogEvent();
             mapClickRegist();
             //addHistogramBoxEvents();
-            $("#open-adcode-histogram").click(function () {
-                $("#histogram-wrapper").show();
-            })
-            $("#close-histogram").click(function () {
-                $("#histogram-wrapper").hide();
-            });
+            statisticWidgetEvent();
+            addHeatmapLayer();
+            switchStatisticTabEvent();
+            oetest();
+
         })
 
         //$("#open-adcode-histogram").click(openHistogramBox());
@@ -222,17 +233,9 @@
             })
         }
 
-        function closeHistogramBox() {  //关闭统计图
 
-            $("#inner-histogram").empty();  //清空统计图
-            $("#histogram-wrapper").hide();
-        }
-        function openHistogramBox() {  //打开统计图
-            $("#histogram-wrapper").show();
-            //添加内嵌统计图
-            $("#inner-histogram").append("<iframe src=\"html/adcodeHistogram.html\" frameborder=\"no\" border=\"0\" marginwidth=\"0\" marginheight=\"0\" id=\"prodcutDetailSrc\"  scrolling=\"0\"  width=\"100%\" height=\"100%\"></iframe>");
 
-        }
+
 
 
 

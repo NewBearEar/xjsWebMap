@@ -2,6 +2,10 @@
     height: 450px;
     width: 600px;
 }
+#inner-pie{
+    height: 450px;
+    width: 600px;
+}
 
 .blurred-bg
 {
@@ -31,11 +35,53 @@
 /*histogram*/
 .histogram-page{
     width: 600px;
-    height: 450px;
+    height: 500px;
     margin: auto;
     position: absolute;
     left: 50%;
     top: 50%;
     transform: translate(-50%,-50%);
     z-index: 2;
+}
+.histogram-page .cd-switcher:after {
+    content: "";
+    display: table;
+    clear: both;
+}
+
+.histogram-page .cd-switcher li {
+    width: 50%;
+    float: left;
+    text-align: center;
+}
+.histogram-page .cd-switcher li:first-child a {
+    border-radius: .25em 0 0 0;
+}
+.histogram-page .cd-switcher li:last-child a {
+    border-radius: 0 .25em 0 0;
+}
+.histogram-page .cd-switcher a {
+    display: block;
+    width: 100%;
+    height: 50px;
+    line-height: 50px;
+    background: #d2d8d8;
+    color: #809191;
+}
+.histogram-page .cd-switcher a.selected {
+    background: #FFF;
+    color: #505260;
+}
+
+/************************/
+.cd-switcher{
+    margin: 0;
+}
+
+#inner-histogram, #inner-pie {
+    display: none;
+}
+
+#inner-histogram.is-selected, #inner-pie.is-selected{
+    display: block;
 }

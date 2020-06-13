@@ -1,6 +1,7 @@
 package servletsrc;
 
 import javasrc.PostgreUtil;
+import org.json.JSONArray;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -8,9 +9,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
+import java.sql.*;
 
 @WebServlet(name = "AdclassPieDataServlet",urlPatterns = "/getAdclassData")
 public class AdclassPieDataServlet extends HttpServlet {
@@ -37,6 +36,27 @@ public class AdclassPieDataServlet extends HttpServlet {
                 "    group by t.adclass;";
         try{
             ppStatement = conn.prepareStatement(countSql);
+            ResultSet rs = ppStatement.executeQuery();
+            ResultSetMetaData rsMeta = ppStatement.getMetaData();
+            JSONArray dataArray = new JSONArray();
+            JSONArray colLabelArray = new JSONArray();
+            for(int i=1;i<=rsMeta.getColumnCount();i++){
+                colLabelArray.put(rsMeta.getColumnLabel(i));
+            }
+            dataArray.put(colLabelArray);
+            while(rs.next()){
+                String name = rs.getString("name");
+                int count = rs.getInt("count");
+                JSONArray colValArray = new JSONArray();
+                colValArray.put(name);
+                colValArray.put(count);
+                dataArray.put(colValArray);
+            }
+            if(! "".equals(dataArray.toString())){
+                response.getWriter().println(dataArray.toString());
+            }else {
+                response.getWriter().println("{}");
+            }
 
         }catch (SQLException e){
             e.printStackTrace();
@@ -47,6 +67,6 @@ public class AdclassPieDataServlet extends HttpServlet {
     }
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-
+        doPost(request,response);
     }
 }
