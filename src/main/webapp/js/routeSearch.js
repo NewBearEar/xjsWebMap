@@ -38,7 +38,7 @@ $("#open-road-search").click(function () {  //管理按钮
         $("#road-route-end input").val("");
     }else {
         isRouteToolOpen = true;
-        map.getLayers().insertAt(3,roadLayer);  //按顺序插入图层
+        map.getLayers().insertAt(6,roadLayer);  //按顺序插入图层
         //打开时
         //清空起始点终止点等所有icon
         markerLayer.getSource().clear(); //获取icon数据源所有feature

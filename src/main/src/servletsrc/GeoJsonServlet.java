@@ -32,6 +32,7 @@ public class GeoJsonServlet extends HttpServlet {
 
         //获取查询文字，由于数据限制，这里支持城市中文名
         String searchTxt = request.getParameter("searchTxt"); //这里为什么不需要ajax的data 的键写成“searchTxt”
+        int isSearchTextComplete = Integer.parseInt(request.getParameter("isSearchTextComplete"));  //获取补全值
         System.out.println(searchTxt);
         //获取查询
         //查询基础语句
@@ -43,7 +44,13 @@ public class GeoJsonServlet extends HttpServlet {
         String sql = "";
         if(!"".equals(searchTxt) || searchTxt!=null) {   //判断查询参数是否为空，利用“”字符串常量调用equals方法，避免searchTxt为null调用equals抛出异常，equals会处理参数为null的情况
             //这里不能使用逻辑运算符==或！=比较，因为只比较了引用是否相等，注意String Pool
-            sql = sqlBase + "where name like " + "\'" + searchTxt + "%\'";    //先支持城市名称的模糊查询试试  //模糊查询只匹配后面的
+            if(0==isSearchTextComplete){
+                //未补全，使用模糊查询
+                sql = sqlBase + "where name like " + "\'" + searchTxt + "%\'";    //先支持城市名称的模糊查询试试  //模糊查询只匹配后面的
+            }else {
+                //补全后使用精准查询
+                sql = sqlBase + "where name like " + "\'" + searchTxt + "\'";
+            }
             System.out.println(sql);   //看看sql语句
         }else {
             sql = sqlBase;

@@ -148,6 +148,7 @@ function addInterEvent() {  //必须要在引入ol的文件的页面内调用一
 
 }
 
+var isSearchTextComplete = 0;  //搜索文字是否被补全，补全时采用精准查询，直接搜索使用模糊查询 ，0代表未补全，默认值为0；1代表补全
 //按钮单击事件
 $('#btn').click(function ajaxConfirm() {  //函数必须放在btn的click里面否则会一直调用
     $("#loadgif").show();
@@ -160,11 +161,14 @@ $('#btn').click(function ajaxConfirm() {  //函数必须放在btn的click里面�
     $.ajax({  //AJAX向Servlet发送get请求，请求后台数据库数据
         url: "getGeoJson", // url不带/就是当前路径（因为我这个html放在webapp目录下），而且在页面上访问时已经包含application context，相当于/xjs/getGeoJson
         dataType: "json",   //传输json
-        data:  {searchTxt:searchTxtValue},   //$('#form2').serialize(),  //按键值对形式
+        data:  {
+            searchTxt:searchTxtValue,
+            "isSearchTextComplete":isSearchTextComplete
+        },   //$('#form2').serialize(),  //按键值对形式
         type: "get",
         success: function (dbGeoJson) {  //回调函数，更新map
             $("#loadgif").hide();  //隐藏加载动画
-
+            isSearchTextComplete = 0;  //补全值置零
             $("#left-panel").css("height","850px");//left-panel显示
             //console.log(dbGeoJson);  //这里已经传回一个json对象
             if($.isEmptyObject(dbGeoJson)){   //判断返回对象是否为空对象
@@ -189,6 +193,7 @@ $('#btn').click(function ajaxConfirm() {  //函数必须放在btn的click里面�
         error: function () {  //请求失败的回调方法
             $("#loadgif").hide();
             alert("请求失败，请重试");
+            isSearchTextComplete = 0;  //补全值置零
         }
     });
 });
@@ -217,6 +222,10 @@ $("#searchTxt").autocomplete({
         //console.log(ui);   //ui就是包含上述10条内容的对象
     },
     select: function (event,ui) {  //某一条被选择时触发
+        //这里由补全完成的内容，补全值置1
+        isSearchTextComplete = 1;
+        //尝试用补全值填充搜索栏
+        $('#searchTxt').val(ui.item.value);   // ui只有一个对象item，item包括name和value
         //这里直接调用btn的click ，ajax提交
         $("#btn").click();
     },

@@ -16,6 +16,9 @@ var jsonVecLayer;
 var roadLayer;
 var markerLayer;
 var routeLayer;
+var secRiver3level;
+var thdRiver4level;
+var fthRiver5level;
 //var routeSource = new ol.source.Vector();   //wfs失败
 
 var dbSourceVec;   //数据库矢量数据源
@@ -47,7 +50,7 @@ var initMap = function(){
     });
 
     initOlTools(mlayers); //初始化工具
-
+    mapZoomEvent();  //河流缩放等级事件
 }
 
 //初始化所有图层，返回图层数组
@@ -131,7 +134,44 @@ var initLayers = function (){
     routeLayer = new ol.layer.Tile({
         visible: false,
         source: new ol.source.TileWMS()
-    })
+    });
+
+    //三级以上河流
+    secRiver3level = new ol.layer.Tile({
+        visible:false,
+        source: new ol.source.TileWMS({
+            ratio: 1,
+            url: urlAdr,
+            params: {
+                "LAYERS": 'hyd2_4p,hyd2_4l',
+            },
+            serverType: 'geoserver'
+        })
+    });
+    //四级河流
+    thdRiver4level = new ol.layer.Tile({
+        visible:false,
+        source: new ol.source.TileWMS({
+            ratio: 1,
+            url: urlAdr,
+            params: {
+                "LAYERS": 'xjs:River4_polyline',
+            },
+            serverType: 'geoserver'
+        })
+    });
+    //5级河流
+    fthRiver5level = new ol.layer.Tile({
+        visible:false,
+        source: new ol.source.TileWMS({
+            ratio: 1,
+            url: urlAdr,
+            params: {
+                "LAYERS": 'xjs:River5_polyline',
+            },
+            serverType: 'geoserver'
+        })
+    });
 
 
     //  wfs暂时失败
@@ -160,7 +200,7 @@ var initLayers = function (){
         })
     })*/
 
-    var mlayers = [osmtile,tiled,jsonVecLayer,dbVecLayer,routeLayer,markerLayer,provinceAnotation];  //图层数组
+    var mlayers = [osmtile,tiled,jsonVecLayer,dbVecLayer,secRiver3level,thdRiver4level,fthRiver5level,routeLayer,markerLayer,provinceAnotation];  //图层数组
     return mlayers;
 }
 
@@ -227,4 +267,32 @@ var initOlTools = function(mlayers){
         //对地图瓦片ol.layer.Tile（指ol.source.TileWMS）似乎影响不大，但为了避免以后不必要的问题，这里还是建议不要在缩略图（以及其他map中）使用相同图层
     });
     map.addControl(overviewMapControl);  //添加鹰眼图
+}
+function mapZoomEvent() {
+    //管理河流缩放级别
+    //map的view的on函数监控resolution变化（放大缩小）事件  ,其他的地方用的addEventListener好像也可。ol官网给的例子没有getView所以直接找不到on函数，而这里本来也是对view缩放等级的事件监听
+    map.getView().on('change:resolution',function(){
+        //console.log(map.getView().getZoom());
+        var zoomLevel = map.getView().getZoom();
+        if(zoomLevel>5){
+            secRiver3level.set('visible',true);
+        }else{
+            secRiver3level.set('visible',false);
+        }
+
+        if(zoomLevel>6){
+            thdRiver4level.set('visible',true);
+
+        }else{
+            thdRiver4level.set('visible',false);
+        }
+
+        if(zoomLevel>7){
+            fthRiver5level.set('visible',true);
+
+        }else{
+            fthRiver5level.set('visible',false);
+        }
+
+    });
 }
