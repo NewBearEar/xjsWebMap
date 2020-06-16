@@ -62,6 +62,7 @@ public class loginServlet extends HttpServlet {
             responJsonObj.put("statusCode",1);
             responJsonObj =  getUserProfile(conn,user_uid,responJsonObj);
             response.getWriter().println(responJsonObj.toString());
+            PostgreUtil.closeDbConn(conn);   //关闭数据库连接
             return;
         }
 

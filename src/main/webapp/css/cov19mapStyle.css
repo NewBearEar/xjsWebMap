@@ -1,0 +1,36 @@
+.cov19map-page {
+    border-radius: 5px;
+    -moz-box-shadow: 0 10px 10px rgba(0, 0, 0, 0.4);
+    -webkit-box-shadow: 0 10px 10px rgba(0, 0, 0, 0.4);
+    box-shadow: 0 10px 10px rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+
+    background-color: rgba(238,238,238,0.9);  /*影响统计图透明度*/
+
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+    /*text-shadow: 0 1px 1px rgba(0, 0, 0, 0.4);*/
+}
+.cov19map-page{
+    width: 800px;
+    height: 650px;
+    margin: auto;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%,-50%);
+    z-index: 2;
+}
+.cov19map-page .cd-switcher:after {
+    content: "";
+    display: table;
+    clear: both;
+}
+#inner-cov19map.is-selected, #inner-pie.is-selected{
+    display: block;
+}
+#inner-cov19map{
+    height: 600px;
+    width: 800px;
+}

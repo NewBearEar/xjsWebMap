@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script src="../dist/echarts_dist/echarts.js"></script>
+    <script src="../dist/echarts_dist/extension/bmap.js"></script>
+    <script src="../dist/echarts_dist/extension/dataTool.js"></script>
+    <script src="http://api.map.baidu.com/api?v2.0&ak=sPra3rOi47EhskugaumFpXx70D0sxGVL"></script>
+    <script src="../dist/jquery/jquery-3.5.1.js"></script>
+    <style type="text/css">
+        .BMap_cpyCtrl {
+            display: none;
+        }
+        .anchorBL {
+            display: none;
+        }
+    </style>
+    <title>Title</title>
+</head>
+<body>
+    <!-- 为 ECharts 准备一个具备大小（宽高）的 DOM -->
+    <div id="cov19-map" style="width: 800px;height:600px;"></div>
+    <script type="text/javascript">
+        var cov19map = echarts.init($("#cov19-map")[0]);
+        $(function () {
+            //var bmap = cov19map.getModel().getComponent('bmap').getBMap();
+
+            bmapStyleJson2 = [
+                {
+                    'featureType': 'water',
+                    'elementType': 'all',
+                    'stylers': {
+                        'color': '#031628'
+                    }
+                },
+                {
+                    'featureType': 'land',
+                    'elementType': 'geometry',
+                    'stylers': {
+                        'color': '#000102'
+                    }
+                },
+                {
+                    'featureType': 'highway',
+                    'elementType': 'all',
+                    'stylers': {
+                        'visibility': 'off'
+                    }
+                },
+                {
+                    'featureType': 'arterial',
+                    'elementType': 'geometry.fill',
+                    'stylers': {
+                        'color': '#000000'
+                    }
+                },
+                {
+                    'featureType': 'arterial',
+                    'elementType': 'geometry.stroke',
+                    'stylers': {
+                        'color': '#0b3d51'
+                    }
+                },
+                {
+                    'featureType': 'local',
+                    'elementType': 'geometry',
+                    'stylers': {
+                        'color': '#000000'
+                    }
+                },
+                {
+                    'featureType': 'railway',
+                    'elementType': 'geometry.fill',
+                    'stylers': {
+                        'color': '#000000'
+                    }
+                },
+                {
+                    'featureType': 'railway',
+                    'elementType': 'geometry.stroke',
+                    'stylers': {
+                        'color': '#08304b'
+                    }
+                },
+                {
+                    'featureType': 'subway',
+                    'elementType': 'geometry',
+                    'stylers': {
+                        'lightness': -70
+                    }
+                },
+                {
+                    'featureType': 'building',
+                    'elementType': 'geometry.fill',
+                    'stylers': {
+                        'color': '#000000'
+                    }
+                },
+                {
+                    'featureType': 'all',
+                    'elementType': 'labels.text.fill',
+                    'stylers': {
+                        'color': '#857f7f'
+                    }
+                },
+                {
+                    'featureType': 'all',
+                    'elementType': 'labels.text.stroke',
+                    'stylers': {
+                        'color': '#000000'
+                    }
+                },
+                {
+                    'featureType': 'building',
+                    'elementType': 'geometry',
+                    'stylers': {
+                        'color': '#022338'
+                    }
+                },
+                {
+                    'featureType': 'green',
+                    'elementType': 'geometry',
+                    'stylers': {
+                        'color': '#062032'
+                    }
+                },
+                {
+                    'featureType': 'boundary',
+                    'elementType': 'all',
+                    'stylers': {
+                        'color': '#465b6c'
+                    }
+                },
+                {
+                    'featureType': 'manmade',
+                    'elementType': 'all',
+                    'stylers': {
+                        'color': '#022338'
+                    }
+                },
+                {
+                    'featureType': 'label',
+                    'elementType': 'all',
+                    'stylers': {
+                        'visibility': 'off'
+                    }
+                }
+            ]
+
+            bmapStyleJson = [{
+                'featureType': 'water',
+                'elementType': 'all',
+                'stylers': {
+                    'color': '#d1d1d1'
+                }
+            }, {
+                'featureType': 'land',
+                'elementType': 'all',
+                'stylers': {
+                    'color': '#f3f3f3'
+                }
+            }, {
+                'featureType': 'railway',
+                'elementType': 'all',
+                'stylers': {
+                    'visibility': 'off'
+                }
+            }, {
+                'featureType': 'highway',
+                'elementType': 'all',
+                'stylers': {
+                    'color': '#fdfdfd'
+                }
+            }, {
+                'featureType': 'highway',
+                'elementType': 'labels',
+                'stylers': {
+                    'visibility': 'off'
+                }
+            }, {
+                'featureType': 'arterial',
+                'elementType': 'geometry',
+                'stylers': {
+                    'color': '#fefefe'
+                }
+            }, {
+                'featureType': 'arterial',
+                'elementType': 'geometry.fill',
+                'stylers': {
+                    'color': '#fefefe'
+                }
+            }, {
+                'featureType': 'poi',
+                'elementType': 'all',
+                'stylers': {
+                    'visibility': 'off'
+                }
+            }, {
+                'featureType': 'green',
+                'elementType': 'all',
+                'stylers': {
+                    'visibility': 'off'
+                }
+            }, {
+                'featureType': 'subway',
+                'elementType': 'all',
+                'stylers': {
+                    'visibility': 'off'
+                }
+            }, {
+                'featureType': 'manmade',
+                'elementType': 'all',
+                'stylers': {
+                    'color': '#d1d1d1'
+                }
+            }, {
+                'featureType': 'local',
+                'elementType': 'all',
+                'stylers': {
+                    'color': '#d1d1d1'
+                }
+            }, {
+                'featureType': 'arterial',
+                'elementType': 'labels',
+                'stylers': {
+                    'visibility': 'off'
+                }
+            }, {
+                'featureType': 'boundary',
+                'elementType': 'all',
+                'stylers': {
+                    'color': '#fefefe'
+                }
+            }, {
+                'featureType': 'building',
+                'elementType': 'all',
+                'stylers': {
+                    'color': '#d1d1d1'
+                }
+            }, {
+                'featureType': 'label',
+                'elementType': 'labels.text.fill',
+                'stylers': {
+                    'color': '#999999'
+                }
+            }];
+
+            var option = {
+                title: {
+                    text: '全国疫情地图——丁香园实时数据',
+                    subtext: 'data from PM25.in',
+                    sublink: 'https://ncov.dxy.cn/ncovh5/view/pneumonia',
+                    left: 'center'
+                },
+                tooltip : {
+                    trigger: 'item'
+                },
+                bmap: {
+                    center: [104.114129, 37.550339],
+                    zoom: 5,
+                    roam: true,
+                    mapStyle: {
+                        styleJson: bmapStyleJson,
+                    }
+                },
+                visualMap: {
+                    show: false,
+                    top: 'top',
+                    min: 5,
+                    max: 350,
+                    seriesIndex: 0,
+                    calculable: true,
+                    inRange: {
+                        color: [ 'blue','lightskyblue','green', 'yellow', 'red']
+                    }
+                },
+                series : [
+                    {
+                        name: 'confirmed-cov19',
+                        type: 'heatmap',
+                        coordinateSystem: 'bmap',
+
+                        encode: {
+                            value: 2
+                        },
+                        label: {
+                            formatter: '{b}',
+                            position: 'right',
+                            show: false
+                        },
+                        itemStyle: {
+                            color: 'purple'
+                        },
+                        emphasis: {
+                            label: {
+                                show: true
+                            }
+                        }
+                    },
+                    {
+                        name: 'Top 20',
+                        type: 'effectScatter',
+                        coordinateSystem: 'bmap',
+
+                        encode: {
+                            value: 2
+                        },
+                        showEffectOn: 'render',
+                        rippleEffect: {
+                            brushType: 'stroke'
+                        },
+                        hoverAnimation: true,
+                        label: {
+                            formatter: '{b}',
+                            position: 'right',
+                            show: true
+                        },
+                        itemStyle: {
+                            color: 'purple',
+                            shadowBlur: 10,
+                            shadowColor: '#333'
+                        },
+                        zlevel: 1
+                    }
+                ]
+            };
+            cov19map.setOption(option);
+            var bmap = cov19map.getModel().getComponent('bmap').getBMap();
+            bmap.addControl(new BMap.MapTypeControl());
+        })
+
+        $("#loadgif").show();
+        $.ajax({  //AJAX向Servlet发送get请求，请求后台数据库数据
+            url: "../getCoV19Data", // url不带/就是当前路径（因为我这个html放在webapp目录下），而且在页面上访问时已经包含application context，相当于/xjs/getGeoJson
+            dataType: "json",   //传输json
+            //data:  paramObj,   //$('#form2').serialize(),  //按键值对形式
+            type: "post",
+            success: function (cov19data) {  //回调函数，更新map
+                $("#loadgif").hide();
+                if($.isEmptyObject(cov19data)){   //判断返回对象是否为空对象
+                    alert("没有疫情数据")
+                }else {
+                    console.log(cov19data);
+                    //组织数据
+                    var res = [];
+                    var features = cov19data.features;
+                    var updatetime = features[0].properties.updatetime;
+                    for(var i=0;i<features.length;i++){
+                        var feature = features[i];
+                        var geoCoord = feature.geometry.coordinates; //坐标数组
+                        var name = feature.properties.name;
+                        var property = feature.properties;
+                        var confirmedcount = property.confirmedcount;  //确诊总人数
+
+                        if (geoCoord) {
+                            res.push({
+                                name: name,
+                                value: geoCoord.concat(confirmedcount)
+                            });
+                        }
+                    }
+                    //console.log(res);
+                    //console.log(res.sort(function (a, b) {
+                    //    return b.value[2] - a.value[2];
+                    //}).slice(0, 20));
+                    cov19map.setOption({
+                        title: {
+                            text: '全国疫情地图(总确诊人数)——丁香园实时数据',
+                            subtext: updatetime + ' ----Update every half an hour',
+                            sublink: 'https://ncov.dxy.cn/ncovh5/view/pneumonia',
+                            left: 'center'
+                        },
+                        series:[{
+                            name:'confirmed-cov19',
+                            data: res,
+                            symbolSize: function (val) {
+                                return val[2] / 10;
+                            },
+                        }, {
+                            name:'Top 20',
+                            data: res.sort(function (a, b) {
+                                return b.value[2] - a.value[2];
+                            }).slice(0,20),
+                            symbolSize: function (val) {
+                                if(val[2]>10000){
+                                    return val[2] / 1500;
+                                }else if(val[2]>1000){
+                                    return val[2]/200;
+                                }else{
+                                    return val[2]/80;
+                                }
+
+                            },
+                        }
+                        ]
+                    })
+                }
+            },
+            error: function () {  //请求失败的回调方法
+                $("#loadgif").hide();
+                alert("请求失败，请重试");
+            }
+        });
+
+    </script>
+</body>
+</html>

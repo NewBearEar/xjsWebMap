@@ -80,10 +80,11 @@ public class AutoSearchCompleteServlet extends HttpServlet {
 
         }else {
             response.getWriter().print("{}");   //表示没有查询到并返回空json
+            PostgreUtil.closeDbConn(testConn);
             return;
         }
 
-
+        PostgreUtil.closeDbConn(testConn);
 
     }
 }

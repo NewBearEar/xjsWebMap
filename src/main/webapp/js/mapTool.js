@@ -1,5 +1,11 @@
 /****点选添加点记录工具*****/
 function addClickDialogEvent() {
+    //信息提示面板
+    $("#message-center").click(function (){
+        //console.log("11")
+        $("#message-center p").toggle();
+    })
+
     $("#dialog-form").dialog({
         autoOpen: false,
         height: 700,
@@ -92,6 +98,10 @@ function addClickDialogEvent() {
         });
 }
 
+//设置全局变量，存储点击位置
+var iconFeature_start =  new ol.Feature();
+var iconFeature_end =  new ol.Feature();
+var iconFeature_somewhere = new ol.Feature();
 function mapClickRegist(){
     map.addEventListener('click', function(evt) {   //  地图单击事件
         var coordinate = evt.coordinate;  //获取点击坐标
@@ -101,6 +111,108 @@ function mapClickRegist(){
         var latitude = coordinate[1];
         $("#longitude").val(longitude);
         $("#latitude").val(latitude);
+
+        //icon style
+        var createLabelStyle = function (feature,imageurl) {
+            var iconStyle = new ol.style.Style({
+                //点的图片样式
+                image: new ol.style.Icon({
+                    //标注图片和文字之间的距离
+                    anchor: [0.5, 46],
+                    //x方向的单位
+                    anchorXUnits: 'fraction',
+                    //y方向的单位
+                    anchorYUnits: 'pixels',
+                    src: imageurl   //icon的url
+                }),
+                //文本样式
+                text: new ol.style.Text({
+                    //对其方式
+                    textAlign: 'center',
+                    //基准线
+                    textBaseline: 'middle',
+                    //文字样式
+                    font: 'normal 14px 微软雅黑',
+                    //文本内容
+                    text: feature.get('name'),
+                    //文本填充样式
+                    fill: new ol.style.Fill({ color: '#aa2200' }),
+                    //笔触
+                    stroke: new ol.style.Stroke({ color: '#ffcc33', width: 1 })
+
+                })
+            });
+            return iconStyle;
+        }
+
+        //为点击位置添加marker
+        //重新加载图层数据源
+        var markerSourceTemp = markerLayer.getSource(); //获取数据源
+        if(1==focusinput){
+            if(markerSourceTemp.hasFeature(iconFeature_start)){
+                markerSourceTemp.removeFeature(iconFeature_start);
+            }
+            if(markerSourceTemp.hasFeature(iconFeature_somewhere)){
+                markerSourceTemp.removeFeature(iconFeature_somewhere);
+            }
+
+        }else if(2==focusinput){
+            if(markerSourceTemp.hasFeature(iconFeature_end)){
+                markerSourceTemp.removeFeature(iconFeature_end);
+            }
+            if(markerSourceTemp.hasFeature(iconFeature_somewhere)){
+                markerSourceTemp.removeFeature(iconFeature_somewhere);
+            }
+
+        }else{
+            markerSourceTemp.forEachFeature(function (feature) {
+                markerSourceTemp.removeFeature(feature);   //对每一个feature进行移除
+            });
+        }
+
+        var imageurl = 'img/pticon.png';
+        var iconName = "somewhere";
+
+
+
+        //console.log(focusinput);
+        //routeSearch中判断焦点的值
+        var currentIconFeature;   //记录哪一个icon需要被添加
+        if(1==focusinput){
+            $("#road-route-start input").val(coordinate.join(","));
+            imageurl = 'img/marker_start.png';
+            iconName = "start";
+            iconFeature_start = new ol.Feature({
+                geometry:new ol.geom.Point(coordinate),
+                name: iconName,
+                type:'icon',
+            });
+            currentIconFeature = iconFeature_start;
+        }else if(2==focusinput){
+            $("#road-route-end input").val(coordinate.join(","));
+            imageurl = 'img/marker_end.png';
+            iconName = "end";
+            iconFeature_end = new ol.Feature({
+                geometry:new ol.geom.Point(coordinate),
+                name: iconName,
+                type:'icon',
+            });
+            currentIconFeature = iconFeature_end;
+        }else{
+            imageurl = 'img/pticon.png';
+            iconName = "somewhere";
+            iconFeature_somewhere = new ol.Feature({
+                geometry:new ol.geom.Point(coordinate),
+                name: iconName,
+                type:'icon',
+            });
+            currentIconFeature = iconFeature_somewhere;
+        }
+        //icon添加
+        currentIconFeature.set("name",iconName);
+        currentIconFeature.setStyle(createLabelStyle(currentIconFeature,imageurl));
+        //console.log(currentIconFeature);
+        markerSourceTemp.addFeature(currentIconFeature);   //向数据源添加新feature
 
     });
 }

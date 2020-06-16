@@ -221,5 +221,94 @@ public class PostgreUtil extends DatabaseUtil { //postgis连接工具类
         String tableStr = "image_table";   //对于gid图片
         return queryImgStream(conn,imgId,tableStr);
     }
+
+    public static void createRouteSearchSqlFunc(){
+        //暂存路径查询函数的sql
+        String tempSqlString = "--删除已存在的函数\n" +
+                "DROP FUNCTION pgr_fromAtoB(tbl varchar,startx float, starty float,endx float,endy float);\n" +
+                "\n" +
+                "--DROP FUNCTION pgr_fromAtoB(varchar, double precision, double precision,\n" +
+                "--                           double precision, double precision);\n" +
+                "--基于任意两点之间的最短路径分析\n" +
+                "CREATE OR REPLACE FUNCTION pgr_fromAtoB(\n" +
+                "    IN tbl varchar,--数据库表名\n" +
+                "    IN x1 double precision,--起点x坐标\n" +
+                "    IN y1 double precision,--起点y坐标\n" +
+                "    IN x2 double precision,--终点x坐标\n" +
+                "    IN y2 double precision,--终点y坐标\n" +
+                "    OUT seq integer,--道路序号\n" +
+                "    OUT gid integer,\n" +
+                "    OUT name text,--道路名\n" +
+                "    OUT heading double precision,\n" +
+                "    OUT cost double precision,--消耗\n" +
+                "    OUT geom geometry--道路几何集合\n" +
+                ")\n" +
+                "    RETURNS SETOF record AS\n" +
+                "$BODY$\n" +
+                "DECLARE\n" +
+                "    sql     text;\n" +
+                "    rec     record;\n" +
+                "    source    integer;\n" +
+                "    target    integer;\n" +
+                "    point    integer;\n" +
+                "\n" +
+                "BEGIN\n" +
+                "    -- 查询距离出发点最近的道路节点\n" +
+                "    EXECUTE 'SELECT id::integer FROM '|| quote_ident(tbl) ||'_vertices_pgr\n" +
+                "            ORDER BY the_geom <-> ST_GeometryFromText(''POINT('\n" +
+                "                || x1 || ' ' || y1 || ')'',4326) LIMIT 1' INTO rec;\n" +
+                "    source := rec.id;\n" +
+                "\n" +
+                "    -- 查询距离目的地最近的道路节点\n" +
+                "    EXECUTE 'SELECT id::integer FROM '|| quote_ident(tbl) ||'_vertices_pgr\n" +
+                "            ORDER BY the_geom <-> ST_GeometryFromText(''POINT('\n" +
+                "                || x2 || ' ' || y2 || ')'',4326) LIMIT 1' INTO rec;\n" +
+                "    target := rec.id;\n" +
+                "\n" +
+                "    -- 最短路径查询\n" +
+                "    seq := 0;\n" +
+                "    sql := 'SELECT gid, geom, node as name, cost, source, target,\n" +
+                "                ST_Reverse(geom) AS flip_geom FROM ' ||\n" +
+                "           'pgr_dijkstra(''SELECT gid as id,\n" +
+                "                source::integer,target::integer,'\n" +
+                "               || 'length::float AS cost FROM '\n" +
+                "               || quote_ident(tbl) || ''', '\n" +
+                "               || source || ', ' || target\n" +
+                "               || ' ,false) as di, '\n" +
+                "               || quote_ident(tbl) || ' WHERE di.edge = gid ORDER BY seq';\n" +
+                "\n" +
+                "\n" +
+                "    -- Remember start point\n" +
+                "    point := source;\n" +
+                "\n" +
+                "    FOR rec IN EXECUTE sql\n" +
+                "        LOOP\n" +
+                "            -- Flip geometry (if required)\n" +
+                "            IF ( point != rec.source ) THEN\n" +
+                "                rec.geom := rec.flip_geom;\n" +
+                "                point := rec.source;\n" +
+                "            ELSE\n" +
+                "                point := rec.target;\n" +
+                "            END IF;\n" +
+                "\n" +
+                "            -- Calculate heading (simplified)\n" +
+                "            EXECUTE 'SELECT degrees( ST_Azimuth(\n" +
+                "                ST_StartPoint(''' || rec.geom::text || '''),\n" +
+                "                ST_EndPoint(''' || rec.geom::text || ''') ) )'\n" +
+                "                INTO heading;\n" +
+                "\n" +
+                "            -- Return record\n" +
+                "            seq     := seq + 1;\n" +
+                "            gid     := rec.gid;\n" +
+                "            name    := rec.name;\n" +
+                "            cost    := rec.cost;\n" +
+                "            geom    := rec.geom;\n" +
+                "            RETURN NEXT;\n" +
+                "        END LOOP;\n" +
+                "    RETURN;\n" +
+                "END;\n" +
+                "$BODY$\n" +
+                "    LANGUAGE 'plpgsql' VOLATILE STRICT;";
+    }
 }
 

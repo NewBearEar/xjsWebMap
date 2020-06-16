@@ -145,7 +145,7 @@ public class UploadImageServlet extends HttpServlet {
         }
 
         response.getWriter().print("{\"statusCode\":1}"); //成功返回1
-
+        PostgreUtil.closeDbConn(testConn);
 
     }
 

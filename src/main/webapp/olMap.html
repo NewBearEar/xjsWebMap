@@ -6,11 +6,9 @@
     <meta name="renderer" content="webkit|blink"/>
     <meta name="force-rendering" content="webkit|blink"/>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1"/>
-
     <script type="text/javascript" src="dist/oldist/openlayers/ol.js"></script>
     <script type="text/javascript" src="dist/jquery/jquery-3.5.1.js"></script>
     <script type="text/javascript" src="dist/jquery-ui-1.12.1/jquery-ui.js"></script>
-
 
     <!--js放在css文件前，防止css样式被js刷掉-->
     <!--链接式导入css-->
@@ -21,6 +19,10 @@
     <link rel="stylesheet" href="css/mySearchStyle.css">
     <link rel="stylesheet" href="css/loginStyle.css">
     <link rel="stylesheet" href="css/statisticWidgetStyle.css">
+    <link rel="stylesheet" href="css/cov19mapStyle.css">
+    <link rel="stylesheet" href="css/heatmapStyle.css">
+    <link rel="stylesheet" href="css/popupStyle.css">
+
     <style>
         /*基于juery ui css
         /*自动补全loading*/
@@ -54,6 +56,107 @@
         h1 { font-size: 1.2em; margin: .6em 0; }
         .ui-dialog .ui-state-error { padding: .3em; }
         .validateTips { border: 1px solid transparent; padding: 0.3em; }
+
+        #right-panel{
+            display: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            position: absolute;
+            border-bottom-right-radius: 2px;
+            width: 330px;
+            border-radius: 2px 0 0 2px;
+            background: #fff;
+            box-shadow: 1px 2px 1px rgba(0,0,0,.15);
+            right: 5px;
+            /* margin-right: -25px; */
+            margin-top: 80px;
+
+        }
+
+        .routebox {
+            -webkit-transition: max-height 1s ease-in;
+            transition: max-height 1s ease-in;
+            overflow: hidden;
+        }
+        .routebox .routebox-content {
+            height: auto!important;
+            position: relative;
+        }
+        .searchbox-content-common {
+            box-sizing: border-box;
+            /* float: left; */
+            width: 329px;
+            /* height: 38px; */
+        }
+        .routebox .routebox-content .routebox-revert {
+            width: 39px;
+            height: 100%;
+            position: absolute;
+            left: 0;
+            top: 0;
+            cursor: pointer;
+        }
+        .routebox .routebox-content .routebox-revert .routebox-revert-icon {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            margin-left: -15px;
+            margin-top: -12px;
+            background: url(img/searchbox_5c0d97d.png) no-repeat -15px -82px #3385ff;
+            width: 27px;
+            height: 25px;
+            border-radius: 5px;
+        }
+        .routebox .routebox-content .routebox-inputs {
+            margin-left: 39px;
+        }
+        .routebox .routebox-content .routebox-input {
+            height: 40px;
+            width: 289px;
+            border-bottom: 1px solid #eaebed;
+            position: relative;
+        }
+        .routebox .routebox-content .routebox-input .route-input-icon {
+            width: 11px;
+            height: 10px;
+            background: url(img/start_ee17f81.png) no-repeat 0 0;
+            position: absolute;
+            top: 15px;
+            left: 3px;
+        }
+        .routebox .routebox-content .routebox-input input {
+            box-sizing: border-box;
+            border: 0;
+            height: 100%;
+            width: 100%;
+            padding: 10px 0;
+            font-size: 14px;
+            border-left: 20px solid transparent;
+            border-right: 27px solid transparent;
+            line-height: 20px;
+        }
+        .routebox .routebox-content .routebox-input .input-clear {
+            left: auto;
+            right: 0;
+            top: 1px;
+        }
+        .input-clear {
+            display: block;
+            cursor: pointer;
+            position: absolute;
+            width: 27px;
+            height: 38px;
+            top: 0;
+            background: url(img/searchbox_5c0d97d.png) no-repeat 0 -114px #fff;
+            display: none;
+        }
+
+
+        .routebox .routebox-content .routebox-input.route-end .route-input-icon {
+            background: url(img/end_e68ad9a.png) no-repeat 0 0;
+        }
 
 
 
@@ -90,12 +193,37 @@
         <div id="message-center" class="center-hidden">
             <div class="message-center-entrance"></div>
             <div id="message-panel">
-                <p class="welcom-message">欢迎登录 <a href="#" id="welcom-nickname"></a></p>
+                <p class="welcom-message" style="display: none">欢迎登录 <a href="#" id="welcom-nickname"></a></p>
             </div>
         </div>
         <div id="tool-center" class="center-hidden">
             <input type="button" id="add-click-tool" value="添加记录" style="padding: .2em 1em">
-            <input type="button" id="open-adcode-histogram" value="打开统计图" class="ui-button ui-corner-all ui-widget" style="padding: .2em 1em">
+            <input type="button" id="open-adcode-histogram" value="普通统计图" class="ui-button ui-corner-all ui-widget" style="padding: .2em 1em">
+            <input type="button" id="open-cov19layer" value="疫情实时爬虫统计图" class="ui-button ui-corner-all ui-widget" style="padding: .2em 1em">
+            <input type="button" id="open-heatmap" value="城市统计热力图层" class="ui-button ui-corner-all ui-widget" style="padding: .2em 1em">
+            <input type="button" id="open-road-search" value="路径查询工具" class="ui-button ui-corner-all ui-widget" style="padding: .2em 1em">
+        </div>
+        <div id="right-panel">
+            <div class="routebox">
+                <div class="searchbox-content-common routebox-content">
+                    <div class="routebox-revert" title="开始路径规划">
+                        <div id="route-search-begin" class="routebox-revert-icon"></div>
+                    </div>
+                    <div class="routebox-inputs">
+                        <div id="road-route-start" class="routebox-input route-start">
+                            <div class="route-input-icon"></div>
+                            <input maxlength="256" placeholder="输入起点经纬度或在图上选点" class="route-start-input" type="text" value>
+                            <div class="input-clear" title="清空"></div>
+                        </div>
+                        <div id="road-route-end" class="routebox-input route-end">
+                            <div class="route-input-icon"></div>
+                            <input maxlength="256" placeholder="输入终点经纬度或在图上选点" class="route-end-input" type="text" value>
+                            <div class="input-clear" title="清空"></div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
         </div>
     </div>
 
@@ -163,7 +291,7 @@
 
     <div id="histogram-wrapper" class="histogram-page blurred-bg tinted shaded " style="display: none" >
         <header id="histogram-header" class="tenant-model-header">
-            <h4 style="margin-left: 20px;padding:5px;font-weight: bold;height: 25px;line-height: 30px;font-size: 15px;color: #b3b3b3;">Adcode Histogram</h4>
+            <h4 style="margin-left: 20px;padding:5px;font-weight: bold;height: 25px;line-height: 30px;font-size: 15px;color: #b3b3b3;">Statistical Chart</h4>
             <span id="close-histogram" class="closeModel">×</span>
         </header>
         <ul class="cd-switcher">
@@ -176,11 +304,23 @@
         <div id="inner-pie" class="hide-statistic">
 
         </div>
+    </div>
+    <div id="cov19map-wrapper" class="cov19map-page blurred-bg tinted shaded " style="display: none" >
+        <header id="cov19map-header" class="tenant-model-header">
+            <h4 style="margin-left: 20px;padding:5px;font-weight: bold;height: 25px;line-height: 30px;font-size: 15px;color: #b3b3b3;">CoV-19 Statistical Map</h4>
+            <span id="close-cov19map" class="closeModel">×</span>
+        </header>
+        <div id="inner-cov19map" class="show-cov19map">
 
+        </div>
     </div>
 
-
-    <div id="map" class="map" ></div>
+    <div id="map" class="map" >
+        <div id="popup" class="ol-popup">
+            <a href="#" id="popup-closer" class="ol-popou-closer"></a>
+            <div id="popup-content"></div>
+        </div>
+    </div>
     <div id="wrapper-loc"></div>
     <script type="text/javascript" src="js/search.js"></script>
     <script type="text/javascript" src="js/initMap.js"></script>
@@ -188,6 +328,12 @@
     <script type="text/javascript" src="js/mapTool.js"></script>
     <script type="text/javascript" src="js/statisticWidgetInit.js"></script>
     <script type="text/javascript" src="js/heatmap.js"></script>
+    <script type="text/javascript" src="js/cov19map.js"></script>
+    <!--<script src="https://unpkg.com/ol-echarts/dist/ol-echarts.js"></script>-->
+    <script type="text/javascript" src="js/routeSearch.js"></script>
+
+
+
 
     <script type="text/javascript">
         //window.onload = checkIfLogined;
@@ -203,9 +349,11 @@
             mapClickRegist();
             //addHistogramBoxEvents();
             statisticWidgetEvent();
-            addHeatmapLayer();
+            heatmapEvent();
             switchStatisticTabEvent();
-            oetest();
+            cov19mapEvent();
+            //oetest();
+            addInterEvent();
 
         })
 
@@ -235,12 +383,11 @@
 
 
 
-
-
-
-
-
     </script>
+
+    <script type="module" src="js/cov19map.js"></script>
+
+
 </body>
 </html>
 

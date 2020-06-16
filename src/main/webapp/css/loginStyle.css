@@ -32,7 +32,20 @@
     padding-bottom: 3px;
     float: right;
 }
-
+#open-cov19layer{
+    border-radius: 5px;
+    height: 30px;
+    box-shadow: 1px 2px 1px rgba(0,0,0,.15);
+    padding-bottom: 3px;
+    float: right;
+}
+#open-road-search{
+    border-radius: 5px;
+    height: 30px;
+    box-shadow: 1px 2px 1px rgba(0,0,0,.15);
+    padding-bottom: 3px;
+    float: right;
+}
 
 
 /*user center*/
@@ -81,7 +94,7 @@
 }
 #message-panel {
     position: fixed;
-    top: 55px;
+    top: 60px;
     right: 60px;
     display: block;
     line-height: 0;

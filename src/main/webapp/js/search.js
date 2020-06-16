@@ -1,3 +1,153 @@
+var container = document.getElementById('popup');
+var content = $('#popup-content');
+var closer = document.getElementById('popup-closer');
+var popup = new ol.Overlay({
+    element: container,
+    positioning: 'bottom-center',
+    autoPan: true,
+    //The animation options used to pan the overlay into view.
+    //This animation is only used when autoPan is enabled.
+    autoPanAnimation: {
+        //动画持续时间
+        duration:250
+    },
+    stopEvent: false,
+    offset: [0, -50]
+});
+var cityNameIdDist = {};  //城市名与district_geocode的字典
+$.ajax({  //AJAX请求json,取出城市名对应的district_geocode
+    url: 'data/weather_district_id.json', // url不带/就是当前路径（因为我这个html放在webapp目录下），而且在页面上访问时已经包含application context，相当于/xjs/getGeoJson
+    dataType: "json",   //传输json
+    type: "get",
+    success: function (districtIdArray) {  //回调函数
+        if($.isEmptyObject(districtIdArray)){   //判断返回对象是否为空对象
+            alert("未获取到城市对应的LocationId");
+        }else{ //非空
+            //console.log(districtIdArray)
+            for(x in districtIdArray){
+                var district = districtIdArray[x].district;
+                var district_geocode = districtIdArray[x].district_geocode;
+                cityNameIdDist[district] = district_geocode;
+            }
+            //console.log(cityNameIdDist);
+        }
+    },
+    error: function () {  //请求失败的回调方法
+        alert("请求失败，请重试");
+    }
+});
+
+function addInterEvent() {  //必须要在引入ol的文件的页面内调用一下，而且map为什么没有on方法
+    map.addEventListener('click', function(evt) {
+        var feature = map.forEachFeatureAtPixel(evt.pixel,
+            function(feature) {
+                return feature;
+            });
+        if (feature) {
+            var coordinates = feature.getGeometry().getCoordinates();
+            //console.log(feature.get('name'));
+            var cityName = feature.get('name');
+            var district_geocode1 = cityNameIdDist[cityName];  //获取对应的id号
+            //console.log(cityName.slice(0, cityName.length-1));
+            var district_geocode2 = cityNameIdDist[cityName.slice(0,cityName.length-1)];  //对于某些名字去掉“县”等描述，取id
+            var district_geocode;
+            if(district_geocode1){  //取有值的那个
+                district_geocode = district_geocode1;
+            }else if(district_geocode2){
+                district_geocode = district_geocode2;
+            }
+            //console.log(district_geocode);
+            var forecastText = cityName+':';
+            var forecastTextArray = [forecastText];
+            //popup.setPosition(coordinates);
+            popup.setPosition(coordinates);
+            //将内容div的内容清空
+            content.empty();
+
+            if(!district_geocode){  //判断是否能够找到对应的geocode
+                forecastTextArray.push("未能找到相应城市的天气预报信息");
+                //添加要素信息
+                //addFeatureInfo(featureInfo);
+                for(i in forecastTextArray){
+                    var text = forecastTextArray[i];
+                    content.append("<p id='text-'"+i+">"+text+"</p>");
+                }
+                //console.log(evt.pixel);
+            }else {
+                //ajax请求百度天气预报API  //百度天气api不知为何，不能够用jsonp实现跨域（callback参数没有反应），改用高德
+                //var ak = 'ZbyTqH1pdREnbxin0Z0Gx4peoHZjGnIv'; //my ak
+                //高德key
+                var key = 'ab69453690f77bca25d70d353a09e501';
+                var weatherapiUrl = 'https://restapi.amap.com/v3/weather/weatherInfo?key='+key+'&city='+district_geocode+'&extensions=all';
+                //参数all表示预报
+                $.ajax({  //AJAX请求天气预报  //ajax执行顺序可能和代码顺序不同，比如这里，ajax请求才会执行，但是其外的内容会继续执行下去
+                    //调用百度api
+                    //url: 'http://api.map.baidu.com/weather/v1/?district_id='+district_geocode+'&data_type=all&ak='+ ak,
+                    //调用高德天气API
+                    url: weatherapiUrl,
+                    dataType: "jsonp",   //传输jsonp,跨域请求 ,
+                    type: "get",
+                    jsonpCallback:"weather",
+                    success: function (forecastObj) {  //回调函数
+                        //console.log(forecastObj);
+                        if ($.isEmptyObject(forecastObj) || forecastObj.status != 1) {   //判断返回对象是否为空对象
+                            forecastTextArray.push("未能找到相应城市的天气预报信息");
+
+                        } else { //非空
+                            //console.log(districtIdArray)
+                            var forecasts = forecastObj.forecasts;
+                            var forecast = forecasts[0];  //只有一个城市
+                            var casts = forecast.casts;
+                            for (x in casts) {
+                                //console.log(casts[x]);
+                                var text_day = casts[x].dayweather;
+                                var text_night = casts[x].nightweather;
+                                var temperature_high = casts[x].daytemp;
+                                var temperature_low = casts[x].nighttemp;
+                                var date = casts[x].date;
+                                var week = casts[x].week;
+                                var temp_text = date + "  星期" + week + " : " + "气温:" + temperature_high + "-" + temperature_low + "," +
+                                    "白天:" + text_day + "," + "夜间:" + text_night ;
+                                forecastTextArray.push(temp_text);
+                            }
+                        }
+                        //console.log(forecastTextArray);
+                        //添加要素信息  //ajax回调函数再调用一次，不会和外面的重复
+                        //addFeatureInfo(featureInfo);
+                        for(i in forecastTextArray){
+                            var text = forecastTextArray[i];
+                            content.append("<p id='text-'"+i+">"+text+"</p>");
+                        }
+                        //console.log(evt.pixel);
+
+                    },
+                    error: function () {  //请求失败的回调方法
+                        alert("请求失败，请重试");
+                        forecastTextArray.push("未能找到相应城市的天气预报信息");
+                    }
+                });
+            }
+
+
+        } else {
+            //将内容div的内容清空
+            content.empty();
+            popup.setPosition(undefined);//Set the position for this overlay. If the position is undefined the overlay is hidden.
+        }
+    });
+    
+    // 鼠标移动的事件
+    map.addEventListener('pointermove', function (evt) {
+        if (evt.dragging) {   //如果是拖动地图造成的鼠标移动，则不作处理
+            return;
+        }
+        var pixel = map.getEventPixel(evt.originalEvent);
+        var hit = map.hasFeatureAtPixel(pixel);
+        map.getTargetElement().style.cursor = hit ? 'pointer' : '';
+    });
+
+}
+
 //按钮单击事件
 $('#btn').click(function ajaxConfirm() {  //函数必须放在btn的click里面否则会一直调用
     $("#loadgif").show();
@@ -74,12 +224,60 @@ $("#searchTxt").autocomplete({
 });
 
 var updateDbVeclayerFeatures = function (dbGeoJson) {  //传入GeoJson对象
+    var featureArray = dbGeoJson.features;
     //重新加载图层数据源
     var dbVecSourceTemp = dbVecLayer.getSource(); //获取数据源
     dbVecSourceTemp.forEachFeature(function (feature) {
         dbVecSourceTemp.removeFeature(feature);   //对每一个feature进行移除
-    })
-    dbVecSourceTemp.addFeatures((new ol.format.GeoJSON()).readFeatures(dbGeoJson));   //向数据源添加新features  (new ol.format.GeoJSON()).readFeatures(dbGeoJson)
+    });
+    map.addOverlay(popup);  //这句话将天气面板的popup添加进来
+    var createLabelStyle = function (feature) {
+
+        var iconStyle = new ol.style.Style({
+            //点的图片样式
+            image: new ol.style.Icon({
+                //标注图片和文字之间的距离
+                anchor: [0.5, 46],
+                //x方向的单位
+                anchorXUnits: 'fraction',
+                //y方向的单位
+                anchorYUnits: 'pixels',
+                src: 'img/pticon.png'
+            }),
+            //文本样式
+            text: new ol.style.Text({
+                //对其方式
+                textAlign: 'center',
+                //基准线
+                textBaseline: 'middle',
+                //文字样式
+                font: 'normal 14px 微软雅黑',
+                //文本内容
+                text: feature.get('name'),
+                //文本填充样式
+                fill: new ol.style.Fill({ color: '#aa2200' }),
+                //笔触
+                stroke: new ol.style.Stroke({ color: '#ffcc33', width: 1 })
+
+            })
+        });
+        return iconStyle;
+    }
+    //icon添加
+    var iconFeatures = [];
+    for(var i=0;i<featureArray.length;i++){
+        var searchedCityname = featureArray[i].properties.name;
+        var searchedCitycoor = featureArray[i].geometry.coordinates;  //坐标数组
+        var iconFeature = new ol.Feature({
+            geometry:new ol.geom.Point(searchedCitycoor),
+            name: searchedCityname,
+            type:'icon',
+        });
+        iconFeature.setStyle(createLabelStyle(iconFeature));
+        iconFeatures.push(iconFeature);
+    }
+    console.log(iconFeatures)
+    dbVecSourceTemp.addFeatures(iconFeatures);   //向数据源添加新features  (new ol.format.GeoJSON()).readFeatures(dbGeoJson)
 }
 
 var addShowCardAndPoiList = function (dbGeoJson) {
@@ -89,7 +287,7 @@ var addShowCardAndPoiList = function (dbGeoJson) {
     }
     //获取Fetures数组
     var featureArray = dbGeoJson.features;
-    console.log(featureArray);
+    //console.log(featureArray);
     //创建card
     $("#cards-level1").append("<li id='card-1'></li>" );
     //添加属性，先写个1试试
@@ -124,14 +322,14 @@ var addShowCardAndPoiList = function (dbGeoJson) {
         }
         var showAttributionArray = [dynamicId,name,pinyin,intro,image];
         showAttributionArray.push(gid); //需要显示信息的数组,gid永远添加在最后，所以push
-        console.log(showAttributionArray);
+        //console.log(showAttributionArray);
         if(i<5){
             addPoiLine("show-poilist",showAttributionArray,i);
         }
     }
 
     //为ul的每个li动态绑定事件，实现选中样式
-    console.log($("#show-poilist li"));
+    //console.log($("#show-poilist li"));
     $("#show-poilist li").on('mouseover',function () {
         $(this).addClass('show-poiline-mouseover');  //mouseover事件时添加类名到li元素，用于css显示
     }).on('mouseout',function () {
@@ -163,7 +361,7 @@ var addShowCardAndPoiList = function (dbGeoJson) {
 function addPoiLine(parentNodeId,showAttributionArray,rowIndex){
     //需要参数：待添加节点的id，需要显示信息的数组,行号
     $("#"+parentNodeId).append("<li id=poi-line-"+rowIndex+"></li>");
-    console.log(showAttributionArray.slice(-1)) ;
+    //console.log(showAttributionArray.slice(-1)) ;
     $("#poi-line-"+rowIndex).attr("class","poi-linebox").attr("name","gid-"+showAttributionArray.slice(-1));    //slice取值 赋值gid(最后一个)给name
 
     //添加li下面的各种div

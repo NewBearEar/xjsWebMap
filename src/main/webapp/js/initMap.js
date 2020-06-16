@@ -2,9 +2,10 @@
 var envstr = '';
 var extent = [73.44696044921875,6.318641185760498,135.08583068847656,53.557926177978516];
 var osmtile;
-var urlAdr = 'http://47.94.150.127:8080/geoserver/xjs/wms';   //8080是Tomcat9那个服务器，需要在云端运行tomcat9
+var geoserverUrl = 'http://47.94.150.127:8080/geoserver/xjs';
+var urlAdr = geoserverUrl+'/wms';   //8080是Tomcat9那个服务器，需要在云端运行tomcat9
 //var layerName = 'xjs:BoundaryChn2_4p,xjs:BoundaryChn2_4l,xjs:BoundaryChn1_4l';
-var layerName = 'xjs:BoundaryChn2_4p,xjs:BoundaryChn2_4l,xjs:BoundaryChn1_4l';
+var layerName = 'xjs:BoundaryChn2_4p,xjs:BoundaryChn2_4l';  //xjs:BoundaryChn1_4l';
 var tiled;   //Tile WMS
 var untiled;   //WMS服务
 var provinceAnotation; //省注记
@@ -12,6 +13,11 @@ var dbVecLayer;  //查询图层
 var map; //地图
 var jsonUrl;
 var jsonVecLayer;
+var roadLayer;
+var markerLayer;
+var routeLayer;
+//var routeSource = new ol.source.Vector();   //wfs失败
+
 var dbSourceVec;   //数据库矢量数据源
 var initMap = function(){
     //设置地图范围
@@ -68,6 +74,8 @@ var initLayers = function (){
         })
     });
 
+
+
     //注记图层
     provinceAnotation = new ol.layer.Image({
         visible:true,
@@ -109,6 +117,39 @@ var initLayers = function (){
             features: (new ol.format.GeoJSON().readFeatures(defaultGeoJsonObj)),
         })
     });
+    //marker图层
+    markerLayer = new ol.layer.Vector({
+        visible: false,   //默认不可见，打开路径查询工具可见
+        title: 'marker vevtor Layer',
+        source: new ol.source.Vector({
+            projection: 'EPSG:4326',
+            features: (new ol.format.GeoJSON().readFeatures(defaultGeoJsonObj)),
+        })
+    });
+
+    //route查询图层
+    routeLayer = new ol.layer.Tile({
+        visible: false,
+        source: new ol.source.TileWMS()
+    })
+
+
+    //  wfs暂时失败
+    /*
+    routeLayer = new ol.layer.Vector({  //source vector
+        visible:false,
+        source: routeSource,
+        style: new ol.style.Style({   //ol的layer style用的是sld的描述方式
+            stroke: new ol.style.Stroke({
+                color:"#ff00ff",
+                width:2
+            })
+        })
+    });
+
+     */
+
+
 
     /*
     dbVecLayer = new ol.layer.Vector({
@@ -119,7 +160,7 @@ var initLayers = function (){
         })
     })*/
 
-    var mlayers = [osmtile,tiled,jsonVecLayer,dbVecLayer,provinceAnotation];  //图层数组
+    var mlayers = [osmtile,tiled,jsonVecLayer,dbVecLayer,routeLayer,markerLayer,provinceAnotation];  //图层数组
     return mlayers;
 }
 
