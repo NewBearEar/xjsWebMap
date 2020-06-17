@@ -245,6 +245,7 @@
                 }else {
                     if(1==updateStatus.statusCode){
                         alert("更新成功！");
+                        location.reload();
                     }else {
                         alert("更新失败！");
                     }
@@ -330,12 +331,14 @@
                 $("#loadgif").hide();
                 console.log(uploadImgStatus);
                 if($.isEmptyObject(uploadImgStatus)) {   //判断返回对象是否为空对象
-                    alert("更新失败！");
+                    alert("图片上传失败！");
                 }else {
                     if(1==uploadImgStatus.statusCode){
-                        alert("更新成功！");
+                        alert("图片上传成功！即将为您跳转到首页");
+                        //直接跳转
+                        window.location.href='../olMap.html';
                     }else {
-                        alert("更新失败！");
+                        alert("图片上传失败！");
                     }
                 }
 
