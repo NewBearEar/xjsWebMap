@@ -241,7 +241,6 @@ var updateDbVeclayerFeatures = function (dbGeoJson) {  //传入GeoJson对象
     });
     map.addOverlay(popup);  //这句话将天气面板的popup添加进来
     var createLabelStyle = function (feature) {
-
         var iconStyle = new ol.style.Style({
             //点的图片样式
             image: new ol.style.Icon({
@@ -267,7 +266,6 @@ var updateDbVeclayerFeatures = function (dbGeoJson) {  //传入GeoJson对象
                 fill: new ol.style.Fill({ color: '#aa2200' }),
                 //笔触
                 stroke: new ol.style.Stroke({ color: '#ffcc33', width: 1 })
-
             })
         });
         return iconStyle;

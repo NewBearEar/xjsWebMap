@@ -1,5 +1,6 @@
 package servletsrc;
 
+import bean.UserProfile;
 import javasrc.PostgreUtil;
 
 import javax.servlet.ServletException;
@@ -16,6 +17,7 @@ public class AddInfoServlet extends HttpServlet {
         request.setCharacterEncoding("utf-8");
         response.setContentType("text/html;charset=utf-8");
         response.setCharacterEncoding("utf-8");
+
         String name = request.getParameter("name");
         String pinyin = request.getParameter("pinyin");
         String intro = request.getParameter("intro");
