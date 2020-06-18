@@ -200,7 +200,9 @@ var initLayers = function (){
         })
     })*/
 
-    var mlayers = [osmtile,tiled,jsonVecLayer,dbVecLayer,secRiver3level,thdRiver4level,fthRiver5level,routeLayer,markerLayer,provinceAnotation];  //图层数组
+    var mlayers = [osmtile,tiled,jsonVecLayer,dbVecLayer,
+        secRiver3level,thdRiver4level,fthRiver5level,
+        routeLayer,markerLayer,provinceAnotation];  //图层数组
     return mlayers;
 }
 

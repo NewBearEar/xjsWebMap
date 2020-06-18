@@ -21,11 +21,12 @@
     height: 40px;
     width: 290px;
     pointer-events: auto;
-    /*试试阴影效果*/
-    filter: progid:DXImageTransform.Microsoft.shadow(color=#909090,direction=120,strength=4);
-    -moz-box-shadow: 1px 1px 10px #909090;
-    -webkit-box-shadow: 1px 1px 10px #909090;
-    box-shadow: 1px 1px 10px #909090;
+    /*阴影效果*/
+    filter: progid:DXImageTransform.Microsoft.shadow(color=#909090,direction=120,strength=4); /*for ie6,7,8*/
+    -moz-box-shadow: 1px 1px 10px #909090; /*for firefox*/
+    -webkit-box-shadow: 1px 1px 10px #909090; /*for chrome,safari*/
+    -o-box-shadow: 1px 1px 10px #909090;  /*for opera*/
+    box-shadow: 1px 1px 10px #909090;  /*for ie9,opera*/
     z-index: 1;   /*用于调整压盖顺序*/
     text-align: center;
 }
