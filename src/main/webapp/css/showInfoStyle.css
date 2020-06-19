@@ -1,3 +1,48 @@
+
+.altrowstable {
+    font-family: verdana,arial,sans-serif;
+    font-size:11px;
+    color:#333333;
+    border-width: 1px;
+    border-color: #a9c6c9;
+    border-collapse: collapse;
+    box-shadow: 1px 1px 2px rgba(100,100,100,0.5);
+}
+.altrowstable th {
+    border-width: 1px;
+    padding: 8px;
+    border-style: solid;
+    border-color: #a9c6c9;
+}
+.altrowstable td {
+    border-width: 1px;
+    padding: 8px;
+    border-style: solid;
+    border-color: #a9c6c9;
+}
+.altrowstable tr {
+    background-color:#d4e3e5;
+}
+
+.altrowstable>tr:hover {
+    background-color: #e80027;
+    color: #ffffff;
+}
+
 .td-noedit{
-    background-color: #aaaaaa;
+     background-color: #aaaaaa;
+ }
+
+.elegant-aero {
+
+    max-width: 400px;
+
+    background: #d4e3e5;
+
+    padding: 20px 20px 20px 20px;
+
+    color: #666;
+    box-shadow: 1px 1px 2px rgba(100,100,100,0.5);
+
+
 }

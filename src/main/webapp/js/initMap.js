@@ -200,8 +200,8 @@ var initLayers = function (){
         })
     })*/
 
-    var mlayers = [osmtile,tiled,jsonVecLayer,dbVecLayer,
-        secRiver3level,thdRiver4level,fthRiver5level,
+    var mlayers = [osmtile,tiled,jsonVecLayer,
+        secRiver3level,thdRiver4level,fthRiver5level,dbVecLayer,   //交换顺序，防止河流压盖icon
         routeLayer,markerLayer,provinceAnotation];  //图层数组
     return mlayers;
 }

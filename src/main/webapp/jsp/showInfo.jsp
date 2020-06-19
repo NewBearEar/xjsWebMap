@@ -64,7 +64,7 @@
         }
     %>
     <form  method="post" onsubmit="return false;">
-        <table id="myTable" border="1">
+        <table id="myTable" class="altrowstable" border="1">
             <tr>
                 <%
 
@@ -77,14 +77,14 @@
                         //out.println("<td>" + key + "</td>");  //java里面出现html不太好，但是先试试
                 %>
 
-                <td class="td-key"> <%=key%> </td>  <!--jsp页面直接插入标签，不在java里面出现html，只能使用普通局部变量，代码块里面的变量无法使用-->
+                <th class="td-key"> <%=key%> </th>  <!--jsp页面直接插入标签，不在java里面出现html，只能使用普通局部变量，代码块里面的变量无法使用-->
 
                 <%
                     }
                 %>
                 <!--<td><p>选择需要上传的图片</p></td>-->
-                <td>删除</td>
-                <td>更新</td>
+                <th>删除</th>
+                <th>更新</th>
             </tr>
             <%
                 for(int row=0;row<propertyArray.length();row++){
@@ -143,7 +143,7 @@
         </table>
     </form>
 
-    <div>
+    <div class="elegant-aero">
         <span><p>请上传你的图片</p></span>
         <form id="img-form" enctype="multipart/form-data" >
             <input id="subImgFile" type="file" name="image" formenctype="multipart/form-data">
