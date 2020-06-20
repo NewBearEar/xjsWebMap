@@ -42,7 +42,7 @@ public class UploadImageServlet extends HttpServlet {
         //核心Api
         FileItemFactory factory = new DiskFileItemFactory();
         ServletFileUpload fileUpload = new ServletFileUpload(factory);
-        //判断是否是muitipart/form-data类型
+        //判断是否是multipart/form-data类型
         if(!ServletFileUpload.isMultipartContent(request)) {
             //resp.getWriter().println("表单的enctype属性不是multipart/form-data类型");
             System.out.println("表单的enctype属性不是multipart/form-data类型");

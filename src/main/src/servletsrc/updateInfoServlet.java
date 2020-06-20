@@ -25,7 +25,8 @@ public class updateInfoServlet extends HttpServlet {
         String user = "postgres";
         String passwd = "xiong123";
         Connection conn = PostgreUtil.getDbConn(url,user,passwd);
-        String updatesql = "update all_city_county set pinyin=?,adcode93=?,name=?,intro=?,image_name=? where gid=?;";  //试试
+        String updatesql = "update all_city_county set pinyin=?,adcode93=?,name=?,intro=?,image_name=? where gid=?;";  //更新语句
+
         String udImageTable = "update image_table set image_name=? where img_id=?";
         String udGeomSql = "update all_city_county set geom=ST_GeomFromText(?,4326) where gid=?;";  //更新geom
 

@@ -102,6 +102,7 @@ function addClickDialogEvent() {
 var iconFeature_start =  new ol.Feature();
 var iconFeature_end =  new ol.Feature();
 var iconFeature_somewhere = new ol.Feature();
+
 function mapClickRegist(){
     map.addEventListener('click', function(evt) {   //  地图单击事件
         var coordinate = evt.coordinate;  //获取点击坐标

@@ -24,6 +24,7 @@ function check_login()
     }
     else
     {
+        $("#login_form,.tenant-model-header").removeClass('shake_effect');  //消除抖动class
         loginAjax(loginParamObj);
 
     }
@@ -109,6 +110,7 @@ function loginAjax(paramObj) {
                 //window.sessionStorage.setItem('username',paramObj.username);
                 //window.sessionStorage.setItem('password',paramObj.password);
                 //console.log(userProfile);
+                $(".tenant-model-header").removeClass('shake_effect');
                 isLogined = true;
                 switchLoginoutWrapper(isLogined);
                 showLoginedInfo(userProfile);

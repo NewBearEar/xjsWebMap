@@ -235,7 +235,7 @@
             url: "../update", // url不带/就是当前路径（因为我这个html放在webapp目录下），而且在页面上访问时已经包含application context，相当于/xjs/getGeoJson
             dataType: "json",   //传输对于jsp页面，只能要求text数据？ 若写json，则即使是200请求成功，也会调用error
             contentType: "application/x-www-form-urlencoded",
-            data: keyValueNodquo,  //不能是json格式的对象，而必须是非json格式的对象，否则后端无法直接从名字读取
+            data: keyValueNodquo,  //不能是json格式的对象，而必须是非json格式的对象，否则后端无法直接从名字读取  //并不是，是因为key里面多了空格
             type: "get",
             success: function (updateStatus) {  //回调函数，更新map
                 $("#loadgif").hide();
@@ -305,7 +305,6 @@
 
         for (var i=0;i<fieldNames.length-2;i++){
             var fieldName = fieldNames[i].innerHTML.replace(/^\s*|\s*$/g, '');   //一列的内容  去除两头空格  innerHTML会多出一个空格？
-            //console.log(fieldName);
             var value = values[i].innerHTML.replace(/^\s*|\s*$/g, '');
             //console.log(fieldName);
             //console.log(value);
@@ -341,7 +340,6 @@
                         alert("图片上传失败！");
                     }
                 }
-
             },
             error: function () {  //请求失败的回调方法
                 $("#loadgif").hide();
