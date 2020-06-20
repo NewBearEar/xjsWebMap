@@ -145,6 +145,7 @@ function logoutAjax() { //
                 switchLoginoutWrapper(isLogined);
                 hideLoginedInfo();
                 closeModalBox();  //关闭登录框
+                location.reload();
             }else {
                 alert("登出失败！");
             }

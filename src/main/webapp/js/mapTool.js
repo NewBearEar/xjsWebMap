@@ -42,7 +42,7 @@ function addClickDialogEvent() {
                 }
                 //alert("1");
                 if (bValid) {
-                    alert("1");
+                    //alert("1");
                     var addInfoFormData = $("#add-info").serialize();//打包FromData  这里序列化会把中文处理成%23%12%83这样的字符
                     var addInfoFormDataJson = JSON.parse(DataDeal.formToJsonStr(addInfoFormData));
                     addInfoFormDataJson.name = $( "#name" ).val();  //重新录入中文
