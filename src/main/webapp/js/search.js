@@ -1,6 +1,7 @@
-var container = document.getElementById('popup');
+
 var content = $('#popup-content');
 var closer = document.getElementById('popup-closer');
+var container = document.getElementById('popup');
 var popup = new ol.Overlay({
     element: container,
     positioning: 'bottom-center',
@@ -168,7 +169,6 @@ $('#btn').click(function ajaxConfirm() {  //函数必须放在btn的click里面�
         type: "get",
         success: function (dbGeoJson) {  //回调函数，更新map
             $("#loadgif").hide();  //隐藏加载动画
-            isSearchTextComplete = 0;  //补全值置零
             $("#left-panel").css("height","850px");//left-panel显示
             //console.log(dbGeoJson);  //这里已经传回一个json对象
             if($.isEmptyObject(dbGeoJson)){   //判断返回对象是否为空对象
@@ -177,11 +177,11 @@ $('#btn').click(function ajaxConfirm() {  //函数必须放在btn的click里面�
                 //添加到到图层
                 //dbVecLayer.source.addFeature((new ol.format.GeoJSON()).readFeatures(dbGeoJson));
                 //改到initMap定义图层，现在只需要重新加载数据源
-
-                //调用函数更新图层要素
-                updateDbVeclayerFeatures(dbGeoJson);
                 //调用函数添加list
                 addShowCardAndPoiList(dbGeoJson);
+                //调用函数更新图层要素
+                updateDbVeclayerFeatures(dbGeoJson);
+
                 //最后判断图层是否可见，不可见则设置为可见
                 if(!dbVecLayer.getVisible()){
                     dbVecLayer.setVisible(true);
@@ -189,6 +189,7 @@ $('#btn').click(function ajaxConfirm() {  //函数必须放在btn的click里面�
                 //console.log(map.getLayers());
                 //map.addLayer(dbVecLayer);
             }
+            isSearchTextComplete = 0;  //补全值置零
         },
         error: function () {  //请求失败的回调方法
             $("#loadgif").hide();
@@ -282,6 +283,7 @@ var updateDbVeclayerFeatures = function (dbGeoJson) {  //传入GeoJson对象
         });
         iconFeature.setStyle(createLabelStyle(iconFeature));
         iconFeatures.push(iconFeature);
+
     }
     console.log(iconFeatures)
     dbVecSourceTemp.addFeatures(iconFeatures);   //向数据源添加新features  (new ol.format.GeoJSON()).readFeatures(dbGeoJson)
@@ -317,17 +319,22 @@ var addShowCardAndPoiList = function (dbGeoJson) {
         //console.log(rest)
         */
         dynamicId = i;
+        var ptCoor = featureArray[i].geometry.coordinates;
+        var lon = ptCoor[0];
+        var lat = ptCoor[1];
+
         var attr = featureArray[i].properties; //返回属性对象
         var name = attr.name;
         var pinyin = attr.pinyin;
         var intro = attr.intro;
         var gid = attr.gid;   //要素的唯一标识码
+        var adcode = attr.adcode93;
         if(attr.image == null){
             var image = "No Image";
         }else {
             var image = attr.image;   //暂定，待修改
         }
-        var showAttributionArray = [dynamicId,name,pinyin,intro,image];
+        var showAttributionArray = [dynamicId,name,pinyin,intro,adcode,lon,lat,image];
         showAttributionArray.push(gid); //需要显示信息的数组,gid永远添加在最后，所以push
         //console.log(showAttributionArray);
         if(i<5){
@@ -369,6 +376,7 @@ function addPoiLine(parentNodeId,showAttributionArray,rowIndex){
     //需要参数：待添加节点的id，需要显示信息的数组,行号
     $("#"+parentNodeId).append("<li id=poi-line-"+rowIndex+"></li>");
     //console.log(showAttributionArray.slice(-1)) ;
+
     $("#poi-line-"+rowIndex).attr("class","poi-linebox").attr("name","gid-"+showAttributionArray.slice(-1));    //slice取值 赋值gid(最后一个)给name
 
     //添加li下面的各种div
@@ -382,12 +390,78 @@ function addPoiLine(parentNodeId,showAttributionArray,rowIndex){
     //$("#poi-img-"+rowIndex).attr("style","")
     //添加info结构
     $("#poi-line-"+rowIndex).append("<div id=poi-info-left-"+ rowIndex+" class='poi-info-left'></div>"); //加上box
-    $("#poi-info-left-"+rowIndex).append("<h3 class='poi-title'>")
+
+    $("#poi-info-left-"+rowIndex).append("<h3 class='poi-title'>");
     $("#poi-info-left-"+rowIndex).children(".poi-title").append("<span id='poi-name-cn' class='poi-name' title="+showAttributionArray[1]+">"+(showAttributionArray[0]+1)+"."+showAttributionArray[1]+"</span>");
-    $("#poi-info-left-"+rowIndex).children(".poi-title").append("<span id='poi-name-pinyin' class='poi-name' title="+showAttributionArray[2]+">"+showAttributionArray[2]+"</span>");
+    $("#poi-info-left-"+rowIndex).children(".poi-title").append("<br>");
+    $("#poi-info-left-"+rowIndex).children(".poi-title").append("<span id='poi-name-pinyin' class='poi-name' title="+showAttributionArray[2]+">"+showAttributionArray[2]+"&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp"+"</span>");
     //详细介绍
     $("#poi-info-left-"+rowIndex).append("<div class='poi-info'>");
     $("#poi-info-left-"+rowIndex).children(".poi-info").append("<p class='poi-introduction'>"+showAttributionArray[3] +"</p>");
 
+    if(1==isSearchTextComplete){
+        $("#poi-info-left-"+rowIndex+" .poi-introduction").css("max-height","1000px");
+        $("#poi-info-left-"+rowIndex+" .poi-info").prepend("<p class='poi-lat' style='font-size: 16px'>纬度:"+showAttributionArray[6]+"</p><br>");
+        $("#poi-info-left-"+rowIndex+" .poi-info").prepend("<p class='poi-lon' style='font-size: 16px'>经度:"+showAttributionArray[5]+"</p>");
+        $("#poi-info-left-"+rowIndex+" .poi-info").prepend("<p class='poi-adcode' style='font-size: 16px'>adcode:"+showAttributionArray[4]+"</p>");
+        searchWeather(showAttributionArray[1],rowIndex);
 
+        //$("#poi-info-left-"+rowIndex+" .poi-name").css("margin-bottom","2px");
+    }
+}
+
+function searchWeather(cityName,rowIndex){
+    var district_geocode1 = cityNameIdDist[cityName];  //获取对应的id号
+    //console.log(cityName.slice(0, cityName.length-1));
+    var district_geocode2 = cityNameIdDist[cityName.slice(0,cityName.length-1)];  //对于某些名字去掉“县”等描述，取id
+    var district_geocode;
+    if(district_geocode1){  //取有值的那个
+        district_geocode = district_geocode1;
+    }else if(district_geocode2){
+        district_geocode = district_geocode2;
+    }
+    //console.log(district_geocode);
+    var forecastText = cityName+':';
+    var forecastTextArray = [forecastText];
+
+    //高德key
+    var key = 'ab69453690f77bca25d70d353a09e501';
+    var weatherapiUrl = 'https://restapi.amap.com/v3/weather/weatherInfo?key='+key+'&city='+district_geocode+'&extensions=all';
+    //参数all表示预报
+    $.ajax({  //AJAX请求天气预报  //ajax执行顺序可能和代码顺序不同，比如这里，ajax请求才会执行，但是其外的内容会继续执行下去
+        //调用高德天气API
+        url: weatherapiUrl,
+        dataType: "jsonp",   //传输jsonp,跨域请求 ,
+        type: "get",
+        jsonpCallback:"weather",
+        success: function (forecastObj) {  //回调函数
+            //console.log(forecastObj);
+            if ($.isEmptyObject(forecastObj) || forecastObj.status != 1) {   //判断返回对象是否为空对象
+                $("#poi-info-left-"+rowIndex+" .poi-info").prepend("<p class='poi-adcode' style='font-size: 16px'>未查询到该城市的天气"+"</p>");
+            } else { //非空
+                //console.log(districtIdArray)
+                var forecasts = forecastObj.forecasts;
+                var forecast = forecasts[0];  //只有一个城市
+                var casts = forecast.casts;
+                for (x in casts) {
+                    //console.log(casts[x]);
+                    var text_day = casts[x].dayweather;
+                    var text_night = casts[x].nightweather;
+                    var temperature_high = casts[x].daytemp;
+                    var temperature_low = casts[x].nighttemp;
+                    var date = casts[x].date;
+                    var week = casts[x].week;
+                    var temp_text ="气温:" + temperature_high + "-" + temperature_low + "," +
+                        "白天:" + text_day + "," + "夜间:" + text_night ;
+                    if(0==x){
+                        $("#poi-info-left-"+rowIndex+" .poi-info").prepend("<p class='poi-adcode' style='font-size: 16px'>今日天气:<br>"+temp_text+"</p>");
+                    }
+
+                }
+            }
+        },
+        error: function () {  //请求失败的回调方法
+            alert("请求失败，请重试");
+                    }
+    });
 }

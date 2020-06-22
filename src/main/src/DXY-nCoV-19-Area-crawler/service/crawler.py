@@ -50,12 +50,9 @@ class Crawler:
             area_information = re.search(r'\[(.*)\]', str(soup.find('script', attrs={'id': 'getAreaStat'})))
             if area_information:
                 self.area_parser(area_information=area_information)
-
             if not area_information:
-
                 time.sleep(3)
                 continue
-
             break
 
         logger.info('Successfully crawled.')

@@ -185,6 +185,7 @@ ol, ul {
     white-space: nowrap;
     text-overflow: ellipsis;
     margin-top: 1px;
+    margin-bottom: 2px;
 }
 .poi-linebox .poi-info {
     margin: 4px 0;

@@ -55,12 +55,6 @@ $("#road-route-end input").focus(function () {  //填充在mapTool.js里
 
 
 $("#route-search-begin").click(function () {
-    /*var routeSourceTemp = routeLayer.getSource();
-    routeSourceTemp.forEachFeature(function (feature) {
-        routeSourceTemp.removeFeature(feature);   //对每一个feature进行移除
-    });*/
-    //routeLayer.setSource(new ol.source.Tile());  //清空source
-
     if($("#road-route-start input").val() && $("#road-route-end input").val()){
         var startpt = $("#road-route-start input").val().split(",");
         var endpt = $("#road-route-end input").val().split(",");

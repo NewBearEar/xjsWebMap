@@ -3,11 +3,6 @@ var heatmap = new ol.layer.Heatmap({
         url: 'heatmapTestData',  //重点
         projection: 'EPSG:3857',
         format: new ol.format.GeoJSON(),
-        /*
-        new ol.format.KML({
-        extractStyles: false
-    })
-         */
     }),
     blur: 30,
     radius: 25,

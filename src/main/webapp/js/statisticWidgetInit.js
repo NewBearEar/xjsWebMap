@@ -24,8 +24,10 @@ function statisticWidgetEvent(){
     function openHistogramBox() {  //打开统计图
         $("#histogram-wrapper").show();
         //添加内嵌统计图
-        $("#inner-histogram").append("<iframe src=\"html/adcodeHistogram.html\" frameborder=\"no\" border=\"0\" marginwidth=\"0\" marginheight=\"0\" id=\"prodcutHistDetailSrc\"  scrolling=\"0\"  width=\"100%\" height=\"100%\"></iframe>");
-        $("#inner-pie").append("<iframe src=\"html/adclassPie.html\" frameborder=\"no\" border=\"0\" marginwidth=\"0\" marginheight=\"0\" id=\"prodcutPieDetailSrc\"  scrolling=\"0\"  width=\"100%\" height=\"100%\"></iframe>");
+        $("#inner-histogram").append("<iframe src=\"html/adcodeHistogram.html\" frameborder=\"no\" border=\"0\" marginwidth=\"0\" marginheight=\"0\" " +
+            "id=\"prodcutHistDetailSrc\"  scrolling=\"0\"  width=\"100%\" height=\"100%\"></iframe>");
+        $("#inner-pie").append("<iframe src=\"html/adclassPie.html\" frameborder=\"no\" border=\"0\" marginwidth=\"0\" marginheight=\"0\" " +
+            "id=\"prodcutPieDetailSrc\"  scrolling=\"0\"  width=\"100%\" height=\"100%\"></iframe>");
     }
 }
 function switchStatisticTabEvent(){
